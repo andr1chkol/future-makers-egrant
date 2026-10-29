@@ -148,6 +148,49 @@ beforeEach(() => {
 });
 afterEach(cleanup);
 
+test("opens the first imported form when a pending empty list resolves after import", async () => {
+  const original = calls.get.getMockImplementation()!;
+  let completeInitialList!: (value: unknown) => void;
+  let formReads = 0;
+  calls.get.mockImplementation((path, ...args) => {
+    if (path !== "/api/v1/forms") return original(path, ...args);
+    formReads += 1;
+    if (formReads === 1)
+      return new Promise((resolve) => {
+        completeInitialList = resolve;
+      });
+    return Promise.resolve({
+      data: { data: [form], pagination: { limit: 200, offset: 0, total: 1 } },
+    });
+  });
+  calls.post.mockResolvedValue({ data: { data: form } });
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false, staleTime: 30_000 } },
+  });
+  show("/profiles", client);
+  fireEvent.change(screen.getByLabelText("Názov formulára"), {
+    target: { value: "First form" },
+  });
+  fireEvent.change(screen.getByLabelText("Definícia JSON"), {
+    target: {
+      value: JSON.stringify({
+        illustrative: true,
+        fields: form.fields,
+        tables: form.tables,
+      }),
+    },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Importovať formulár" }));
+  await waitFor(() => expect(calls.post).toHaveBeenCalled());
+  completeInitialList({
+    data: { data: [], pagination: { limit: 200, offset: 0, total: 0 } },
+  });
+  expect(await screen.findByLabelText("Názov profilu")).toHaveValue(
+    "Faktúra · Grant A",
+  );
+  expect(screen.getByLabelText("Cieľový formulár")).toHaveValue(form.id);
+});
+
 test("lists forms and profiles, searches and exposes import failures", async () => {
   show("/profiles");
   expect(await screen.findByText("Grant A")).toBeInTheDocument();

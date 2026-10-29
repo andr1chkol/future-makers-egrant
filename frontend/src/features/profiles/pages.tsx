@@ -4,7 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { FileJson, Plus } from "lucide-react";
 import { api } from "../../shared/api";
 import { Button, Notice } from "../../shared/ui";
-import { errorMessage, validationErrors } from "./model";
+import { errorMessage, validationErrors, type FormDefinition } from "./model";
 import { loadForms, loadProfiles } from "./data";
 import "./profiles.css";
 
@@ -51,6 +51,13 @@ export function ProfilesPage() {
         );
         return;
       }
+      // An initial empty-list request can finish after import. Cancel it before
+      // seeding the committed form, otherwise staleTime keeps the editor empty.
+      await cache.cancelQueries({ queryKey: ["forms"] });
+      cache.setQueryData<FormDefinition[]>(["forms"], (current = []) => [
+        ...current.filter((form) => form.id !== data.data.id),
+        data.data,
+      ]);
       await cache.invalidateQueries({ queryKey: ["forms"] });
       navigate(`/profiles/new?formId=${encodeURIComponent(data.data.id)}`);
     } catch {
