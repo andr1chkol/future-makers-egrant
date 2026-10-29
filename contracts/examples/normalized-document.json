@@ -1,0 +1,33 @@
+{
+  "documentId": "00000000-0000-4000-8000-000000000001",
+  "units": [
+    {
+      "id": "row-1",
+      "text": "invoiceNumber,supplier,issueDate,buyer,purchaseOrder,description,quantity,unitPriceEUR,totalEUR",
+      "page": null,
+      "sheet": "invoice",
+      "cell": "A1:I1"
+    },
+    {
+      "id": "row-2",
+      "text": "DEMO-2026-001,Demo Paper s.r.o.,2026-10-20,Demo Grant Association,,Workshop notebooks,2.00,12.50,25.00",
+      "page": null,
+      "sheet": "invoice",
+      "cell": "A2:I2"
+    },
+    {
+      "id": "row-3",
+      "text": ",,,,,Training materials,3.00,10.00,30.00",
+      "page": null,
+      "sheet": "invoice",
+      "cell": "A3:I3"
+    },
+    {
+      "id": "row-4",
+      "text": ",,,,,TOTAL,,,55.00",
+      "page": null,
+      "sheet": "invoice",
+      "cell": "A4:I4"
+    }
+  ]
+}

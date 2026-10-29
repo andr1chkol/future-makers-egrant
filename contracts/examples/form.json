@@ -1,0 +1,91 @@
+{
+  "id": "00000000-0000-4000-8000-000000000002",
+  "name": "Ukážkový grant",
+  "isIllustrative": true,
+  "originalJson": {
+    "illustrative": true,
+    "unknownConfiguration": {
+      "preserved": true
+    }
+  },
+  "fields": [
+    {
+      "tag": "invoice_number",
+      "label": "Číslo faktúry",
+      "type": "string",
+      "required": true,
+      "options": null
+    },
+    {
+      "tag": "supplier",
+      "label": "Dodávateľ",
+      "type": "string",
+      "required": true,
+      "options": null
+    },
+    {
+      "tag": "issue_date",
+      "label": "Dátum vystavenia",
+      "type": "date",
+      "required": true,
+      "options": null
+    },
+    {
+      "tag": "buyer",
+      "label": "Odberateľ",
+      "type": "string",
+      "required": true,
+      "options": null
+    },
+    {
+      "tag": "purchase_order",
+      "label": "Objednávka",
+      "type": "string",
+      "required": false,
+      "options": null
+    },
+    {
+      "tag": "total",
+      "label": "Celková suma",
+      "type": "money",
+      "required": true,
+      "options": null
+    }
+  ],
+  "tables": [
+    {
+      "tag": "items",
+      "label": "Položky",
+      "columns": [
+        {
+          "tag": "description",
+          "label": "Popis",
+          "type": "string",
+          "required": true,
+          "options": null
+        },
+        {
+          "tag": "quantity",
+          "label": "Množstvo",
+          "type": "decimal",
+          "required": true,
+          "options": null
+        },
+        {
+          "tag": "unit_price",
+          "label": "Jednotková cena",
+          "type": "money",
+          "required": true,
+          "options": null
+        },
+        {
+          "tag": "line_total",
+          "label": "Suma",
+          "type": "money",
+          "required": true,
+          "options": null
+        }
+      ]
+    }
+  ]
+}

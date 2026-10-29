@@ -1,0 +1,12 @@
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "filename": "synthetic-invoice.csv",
+  "mediaType": "text/csv",
+  "status": "ready",
+  "contentHash": "f7fcd50fb6322edff0bb3f10dcd8621542519cb3c38055b57ddb14be168c46d1",
+  "duplicateOf": null,
+  "createdAt": "2026-10-29T10:00:00Z",
+  "pageCount": null,
+  "warnings": [],
+  "error": null
+}

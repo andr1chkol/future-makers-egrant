@@ -1,0 +1,99 @@
+{
+  "extractionId": "00000000-0000-4000-8000-000000000004",
+  "revision": 2,
+  "status": "confirmed",
+  "fields": [
+    {
+      "key": "invoice_number",
+      "value": "DEMO-2026-001"
+    },
+    {
+      "key": "supplier",
+      "value": "Demo Paper s.r.o."
+    },
+    {
+      "key": "issue_date",
+      "value": "2026-10-20"
+    },
+    {
+      "key": "buyer",
+      "value": "Demo Grant Association"
+    },
+    {
+      "key": "purchase_order",
+      "value": "HUMAN-PO-001"
+    },
+    {
+      "key": "total",
+      "value": {
+        "amount": "55.00",
+        "currency": "EUR"
+      }
+    }
+  ],
+  "tables": [
+    {
+      "key": "items",
+      "rows": [
+        {
+          "rowId": "00000000-0000-4000-8000-000000000006",
+          "cells": [
+            {
+              "key": "description",
+              "value": "Workshop notebooks"
+            },
+            {
+              "key": "quantity",
+              "value": "2.00"
+            },
+            {
+              "key": "unit_price",
+              "value": {
+                "amount": "12.50",
+                "currency": "EUR"
+              }
+            },
+            {
+              "key": "line_total",
+              "value": {
+                "amount": "25.00",
+                "currency": "EUR"
+              }
+            }
+          ]
+        },
+        {
+          "rowId": "00000000-0000-4000-8000-000000000007",
+          "cells": [
+            {
+              "key": "description",
+              "value": "Training materials"
+            },
+            {
+              "key": "quantity",
+              "value": "3.00"
+            },
+            {
+              "key": "unit_price",
+              "value": {
+                "amount": "10.00",
+                "currency": "EUR"
+              }
+            },
+            {
+              "key": "line_total",
+              "value": {
+                "amount": "30.00",
+                "currency": "EUR"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "acknowledgedWarnings": [
+    "5edd24d24e91a4ab8310d2c1400d4afd110a61e69ce3f67cba51a48524067c40"
+  ],
+  "confirmedAt": "2026-10-29T10:00:00Z"
+}
