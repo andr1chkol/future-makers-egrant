@@ -1,0 +1,267 @@
+{
+  "name": "contract-works",
+  "profile": "contract",
+  "options": {
+    "contract_type": [
+      "service",
+      "works",
+      "purchase"
+    ]
+  },
+  "document": {
+    "documentId": "00000000-0000-4000-8000-0000000000d5",
+    "units": [
+      {
+        "id": "c1",
+        "text": "ZMLUVA O DIELO č. ZD-12/2026",
+        "page": 1,
+        "sheet": null,
+        "cell": null
+      },
+      {
+        "id": "c2",
+        "text": "Objednávateľ: Obec Dolná Ves, Hlavná 1, 900 01 Dolná Ves",
+        "page": 1,
+        "sheet": null,
+        "cell": null
+      },
+      {
+        "id": "c3",
+        "text": "Zhotoviteľ: Stavby Horák s.r.o., Priemyselná 8, 917 01 Trnava",
+        "page": 1,
+        "sheet": null,
+        "cell": null
+      },
+      {
+        "id": "c4",
+        "text": "Predmet: rekonštrukcia komunitného centra",
+        "page": 1,
+        "sheet": null,
+        "cell": null
+      },
+      {
+        "id": "c5",
+        "text": "Cena diela: 48 600,00 EUR bez DPH",
+        "page": 1,
+        "sheet": null,
+        "cell": null
+      },
+      {
+        "id": "c6",
+        "text": "Termín začatia: 1. 11. 2026. Termín dokončenia: 30. 4. 2027",
+        "page": 2,
+        "sheet": null,
+        "cell": null
+      },
+      {
+        "id": "c7",
+        "text": "1. etapa – búracie práce do 30.11.2026: 12 000,00 EUR",
+        "page": 2,
+        "sheet": null,
+        "cell": null
+      },
+      {
+        "id": "c8",
+        "text": "2. etapa – dokončenie do 30.04.2027: 36 600,00 EUR",
+        "page": 2,
+        "sheet": null,
+        "cell": null
+      },
+      {
+        "id": "c9",
+        "text": "V Dolnej Vsi dňa 27.10.2026",
+        "page": 2,
+        "sheet": null,
+        "cell": null
+      }
+    ]
+  },
+  "expected": {
+    "fields": {
+      "contract_number": "ZD-12/2026",
+      "client": "Obec Dolná Ves",
+      "contractor": "Stavby Horák s.r.o.",
+      "signed_date": "2026-10-27",
+      "start_date": "2026-11-01",
+      "end_date": "2027-04-30",
+      "contract_value": {
+        "amount": "48600.00",
+        "currency": "EUR"
+      },
+      "contract_type": "works"
+    },
+    "tables": {
+      "milestones": [
+        {
+          "description": "1. etapa – búracie práce",
+          "due_date": "2026-11-30",
+          "amount": {
+            "amount": "12000.00",
+            "currency": "EUR"
+          }
+        },
+        {
+          "description": "2. etapa – dokončenie",
+          "due_date": "2027-04-30",
+          "amount": {
+            "amount": "36600.00",
+            "currency": "EUR"
+          }
+        }
+      ]
+    }
+  },
+  "recordedReply": {
+    "fields": {
+      "contract_number": {
+        "value": "ZD-12/2026",
+        "evidence": [
+          {
+            "unitId": "c1",
+            "quote": "ZD-12/2026"
+          }
+        ]
+      },
+      "client": {
+        "value": "Obec Dolná Ves",
+        "evidence": [
+          {
+            "unitId": "c2",
+            "quote": "Obec Dolná Ves"
+          }
+        ]
+      },
+      "contractor": {
+        "value": "Stavby Horák s.r.o.",
+        "evidence": [
+          {
+            "unitId": "c3",
+            "quote": "Stavby Horák s.r.o."
+          }
+        ]
+      },
+      "signed_date": {
+        "value": "27.10.2026",
+        "evidence": [
+          {
+            "unitId": "c9",
+            "quote": "27.10.2026"
+          }
+        ]
+      },
+      "start_date": {
+        "value": "1. 11. 2026",
+        "evidence": [
+          {
+            "unitId": "c6",
+            "quote": "1. 11. 2026"
+          }
+        ]
+      },
+      "end_date": {
+        "value": "30. 4. 2027",
+        "evidence": [
+          {
+            "unitId": "c6",
+            "quote": "30. 4. 2027"
+          }
+        ]
+      },
+      "contract_value": {
+        "value": {
+          "amount": "48 600,00",
+          "currency": "EUR"
+        },
+        "evidence": [
+          {
+            "unitId": "c5",
+            "quote": "48 600,00"
+          }
+        ]
+      },
+      "contract_type": {
+        "value": "service",
+        "evidence": [
+          {
+            "unitId": "c1",
+            "quote": "ZMLUVA O DIELO"
+          }
+        ]
+      }
+    },
+    "tables": {
+      "milestones": {
+        "rows": [
+          {
+            "cells": {
+              "description": {
+                "value": "1. etapa – búracie práce",
+                "evidence": [
+                  {
+                    "unitId": "c7",
+                    "quote": "1. etapa – búracie práce"
+                  }
+                ]
+              },
+              "due_date": {
+                "value": "30.11.2026",
+                "evidence": [
+                  {
+                    "unitId": "c7",
+                    "quote": "30.11.2026"
+                  }
+                ]
+              },
+              "amount": {
+                "value": {
+                  "amount": "12 000,00",
+                  "currency": "EUR"
+                },
+                "evidence": [
+                  {
+                    "unitId": "c7",
+                    "quote": "12 000,00"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "cells": {
+              "description": {
+                "value": "2. etapa – dokončenie",
+                "evidence": [
+                  {
+                    "unitId": "c8",
+                    "quote": "2. etapa – dokončenie"
+                  }
+                ]
+              },
+              "due_date": {
+                "value": "30.04.2027",
+                "evidence": [
+                  {
+                    "unitId": "c8",
+                    "quote": "30.04.2027"
+                  }
+                ]
+              },
+              "amount": {
+                "value": {
+                  "amount": "36 600,00",
+                  "currency": "EUR"
+                },
+                "evidence": [
+                  {
+                    "unitId": "c8",
+                    "quote": "36 600,00"
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

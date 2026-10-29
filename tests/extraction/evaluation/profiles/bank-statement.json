@@ -1,0 +1,83 @@
+{
+  "id": "00000000-0000-4000-8000-0000000000a3",
+  "version": 1,
+  "name": "Výpis z účtu",
+  "documentKind": "bank-statement",
+  "formId": "00000000-0000-4000-8000-0000000000f1",
+  "scalarFields": [
+    {
+      "key": "account_holder",
+      "label": "Majiteľ účtu",
+      "type": "string",
+      "description": "Name of the account holder",
+      "required": true,
+      "targetTag": "account_holder"
+    },
+    {
+      "key": "iban",
+      "label": "IBAN",
+      "type": "string",
+      "description": "Account IBAN as printed",
+      "required": true,
+      "targetTag": "iban"
+    },
+    {
+      "key": "statement_date",
+      "label": "Dátum výpisu",
+      "type": "date",
+      "description": "Date of the statement",
+      "required": true,
+      "targetTag": "statement_date"
+    },
+    {
+      "key": "opening_balance",
+      "label": "Počiatočný zostatok",
+      "type": "money",
+      "description": "Balance at the start of the period",
+      "required": true,
+      "targetTag": "opening_balance"
+    },
+    {
+      "key": "closing_balance",
+      "label": "Konečný zostatok",
+      "type": "money",
+      "description": "Balance at the end of the period",
+      "required": true,
+      "targetTag": "closing_balance"
+    }
+  ],
+  "tableFields": [
+    {
+      "key": "transactions",
+      "label": "Transakcie",
+      "targetTag": "transactions",
+      "writeMode": "replace",
+      "columns": [
+        {
+          "key": "booking_date",
+          "label": "Dátum",
+          "type": "date",
+          "description": "Booking date",
+          "required": true,
+          "targetTag": "booking_date"
+        },
+        {
+          "key": "description",
+          "label": "Popis",
+          "type": "string",
+          "description": "Transaction description",
+          "required": true,
+          "targetTag": "description"
+        },
+        {
+          "key": "amount",
+          "label": "Suma",
+          "type": "money",
+          "description": "Signed amount; debits are negative",
+          "required": true,
+          "targetTag": "amount"
+        }
+      ]
+    }
+  ]
+}
