@@ -1,4 +1,5 @@
 from alembic import context
+from app.integrations import models as submission_models  # noqa: F401
 from app.platform import models  # noqa: F401
 from app.platform.database import Base
 from app.platform.settings import get_settings

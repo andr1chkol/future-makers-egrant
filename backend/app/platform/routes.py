@@ -3,15 +3,14 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, File, Header, Query, UploadFile
-from fastapi.responses import JSONResponse, Response
+from fastapi import APIRouter, File, Query, UploadFile
+from fastapi.responses import Response
 
 from app.platform.contracts import (
     ConfirmReview,
     CreateExtractions,
     CreateForm,
     CreateProfileVersion,
-    CreateSubmission,
     Document,
     Extraction,
     ExtractionBatch,
@@ -22,8 +21,6 @@ from app.platform.contracts import (
     ProfileDefinition,
     Review,
     SaveReview,
-    Submission,
-    SubmissionPayload,
     Success,
 )
 from app.platform.errors import UnavailableError
@@ -141,36 +138,4 @@ def save_review(extraction_id: UUID, request: SaveReview):
 
 @router.post("/reviews/{extraction_id}/confirm", response_model=Success[Review])
 def confirm_review(extraction_id: UUID, request: ConfirmReview):
-    raise UnavailableError()
-
-
-@router.post(
-    "/submissions",
-    status_code=201,
-    response_model=Success[Submission],
-    responses={202: {"model": Success[Submission], "description": "eGrant apply queued"}},
-)
-def create_submission(
-    request: CreateSubmission, idempotency_key: Annotated[str, Header(min_length=1, max_length=128)]
-):
-    raise UnavailableError()
-
-
-@router.get("/submissions/{id}", response_model=Success[Submission])
-def get_submission(id: UUID):
-    raise UnavailableError()
-
-
-@router.get(
-    "/submissions/{id}/export",
-    response_class=JSONResponse,
-    response_model=SubmissionPayload,
-    responses={
-        200: {
-            "description": "JSON attachment",
-            "headers": {"Content-Disposition": {"schema": {"type": "string"}}},
-        }
-    },
-)
-def export_submission(id: UUID):
     raise UnavailableError()

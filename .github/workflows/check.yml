@@ -16,6 +16,7 @@ jobs:
         options: --health-cmd "pg_isready -U egrant -d egrant_test" --health-interval 2s --health-retries 30
     env:
       TEST_DATABASE_URL: postgresql+psycopg://egrant:local-test-only@localhost:5432/egrant_test
+      INTEGRATION_E2E_DATABASE_URL: postgresql+psycopg://egrant:local-test-only@localhost:5432/egrant_test_e2e_integration
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -33,6 +34,8 @@ jobs:
       - run: npx playwright install --with-deps chromium
         working-directory: frontend
       - run: make e2e
+      - run: PGPASSWORD=local-test-only createdb -h localhost -U egrant egrant_test_e2e_integration
+      - run: make e2e-integration
       - uses: actions/upload-artifact@v4
         if: always()
         with:

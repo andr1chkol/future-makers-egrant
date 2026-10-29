@@ -10,6 +10,8 @@ from datetime import UTC, datetime
 from uuid import UUID
 
 request_id: ContextVar[str | None] = ContextVar("request_id", default=None)
+job_id: ContextVar[str | None] = ContextVar("job_id", default=None)
+job_attempt: ContextVar[int | None] = ContextVar("job_attempt", default=None)
 EVENTS = {
     "document.uploaded",
     "document.processing_started",
@@ -37,7 +39,7 @@ EVENTS = {
     "request.failed",
 }
 ID_KEYS = {"requestId", "jobId", "documentId", "extractionId", "submissionId"}
-NUMBER_KEYS = {"durationMs", "attempt"}
+NUMBER_KEYS = {"durationMs", "attempt", "revision"}
 
 
 def safe_id(value):
@@ -61,6 +63,10 @@ class JsonFormatter(logging.Formatter):
         context = dict(getattr(record, "context", {}))
         if request_id.get():
             context.setdefault("requestId", request_id.get())
+        if job_id.get():
+            context.setdefault("jobId", job_id.get())
+        if job_attempt.get() is not None:
+            context.setdefault("attempt", job_attempt.get())
         for key, value in context.items():
             if key in ID_KEYS:
                 result[key] = safe_id(value)

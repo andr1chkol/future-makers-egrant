@@ -10,7 +10,7 @@ from sqlalchemy import func, select, text, update
 
 def test_migration_and_transactional_enqueue(database):
     with database() as session:
-        assert session.scalar(text("SELECT version_num FROM alembic_version")) == "0001_platform"
+        assert session.scalar(text("SELECT version_num FROM alembic_version")) == "0501_submissions"
         assert session.scalar(text("SHOW server_version")).startswith("16.")
         enqueue(session, "document.process", JobPayload(resource_id=uuid4()))
         session.rollback()
@@ -69,7 +69,7 @@ def test_retry_is_bounded_and_request_correlation_reaches_handler(database):
     assert observed == [(resource_id, correlation)] * 3
 
 
-def test_missing_handlers_fail_and_apply_is_never_blindly_retried(database):
+def test_orphan_apply_fails_and_is_never_blindly_retried(database):
     registry = build_registry()
     assert set(registry.handlers) == {"document.process", "extraction.process", "submission.apply"}
     with database.begin() as session:
@@ -79,7 +79,7 @@ def test_missing_handlers_fail_and_apply_is_never_blindly_retried(database):
         job = session.get(Job, job_id)
         assert job.status == "failed"
         assert job.max_attempts == 1
-        assert job.error_code == "HANDLER_UNAVAILABLE"
+        assert job.error_code == "JOB_FAILED"
     assert not run_once(database, registry)
 
 
