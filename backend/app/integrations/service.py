@@ -156,23 +156,32 @@ def apply_submission(session: Session, id: UUID) -> None:
 def recover_interrupted_submissions(session: Session) -> None:
     """Terminal queue leases must not leave an operation apparently in progress."""
     with session.begin():
-        records = session.scalars(
-            select(SubmissionRecord)
+        # Recovery runs outside a handler's ContextVars. Read the latest failed job
+        # with each operation so restart logs keep the original request correlation.
+        failed_job_id = (
+            select(Job.id)
+            .where(
+                Job.kind == "submission.apply",
+                Job.status == "failed",
+                Job.payload["resource_id"].astext == cast(SubmissionRecord.id, String),
+            )
+            .order_by(Job.created_at.desc(), Job.id.desc())
+            .limit(1)
+            .correlate(SubmissionRecord)
+            .scalar_subquery()
+        )
+        records = session.execute(
+            select(SubmissionRecord, Job)
+            .join(Job, Job.id == failed_job_id)
             .where(
                 SubmissionRecord.mode == "egrant",
                 SubmissionRecord.status.in_(["prepared", "applying"]),
-                select(Job.id)
-                .where(
-                    Job.kind == "submission.apply",
-                    Job.status == "failed",
-                    Job.payload["resource_id"].astext == cast(SubmissionRecord.id, String),
-                )
-                .exists(),
             )
-            .with_for_update(skip_locked=True)
+            .with_for_update(of=SubmissionRecord, skip_locked=True)
             .limit(100)
         ).all()
-        for record in records:
+        results = []
+        for record, failed_job in records:
             record.status = "unknown" if record.status == "applying" else "failed"
             record.error = {
                 "code": "RECONCILIATION_REQUIRED"
@@ -183,12 +192,16 @@ def recover_interrupted_submissions(session: Session) -> None:
                 else "Apply job exhausted before dispatch",
                 "details": None,
             }
-        results = [submission_dto(record) for record in records]
-    for result in results:
+            context = {"jobId": failed_job.id, "attempt": failed_job.attempt}
+            if failed_job.request_id is not None:
+                context["requestId"] = failed_job.request_id
+            results.append((submission_dto(record), context))
+    for result, context in results:
         log(
             f"submission.{result.status}",
             level=logging.ERROR,
             submissionId=result.id,
             extractionId=result.review_id,
             errorCode=result.error.code,
+            **context,
         )
