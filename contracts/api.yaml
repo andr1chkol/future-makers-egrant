@@ -1,0 +1,3482 @@
+openapi: 3.1.0
+info:
+  title: eGrant document assistant
+  version: 1.0.0
+paths:
+  /health:
+    get:
+      summary: Health
+      operationId: health_health_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success_dict_str__str__'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '413':
+          description: Request Entity Too Large
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '422':
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '502':
+          description: Bad Gateway
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
+          description: Service Unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+  /api/v1/auth/login:
+    post:
+      summary: Login
+      operationId: login_api_v1_auth_login_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Login'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success_SessionInfo_'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '413':
+          description: Request Entity Too Large
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '422':
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '502':
+          description: Bad Gateway
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
+          description: Service Unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+  /api/v1/auth/session:
+    get:
+      summary: Session Info
+      operationId: session_info_api_v1_auth_session_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success_SessionInfo_'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '413':
+          description: Request Entity Too Large
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '422':
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '502':
+          description: Bad Gateway
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
+          description: Service Unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      security:
+      - APIKeyCookie: []
+    delete:
+      summary: Logout
+      operationId: logout_api_v1_auth_session_delete
+      responses:
+        '204':
+          description: Successful Response
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '413':
+          description: Request Entity Too Large
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '422':
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '502':
+          description: Bad Gateway
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
+          description: Service Unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      security:
+      - APIKeyCookie: []
+  /api/v1/capabilities:
+    get:
+      summary: Capabilities
+      operationId: capabilities_api_v1_capabilities_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success_Capabilities_'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '413':
+          description: Request Entity Too Large
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '422':
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '502':
+          description: Bad Gateway
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
+          description: Service Unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      security:
+      - APIKeyCookie: []
+  /api/v1/documents:
+    post:
+      summary: Upload Documents
+      operationId: upload_documents_api_v1_documents_post
+      security:
+      - APIKeyCookie: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Body_upload_documents_api_v1_documents_post'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success_list_Document__'
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Not Found
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Conflict
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Request Entity Too Large
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Unprocessable Entity
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Internal Server Error
+        '502':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Bad Gateway
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Service Unavailable
+    get:
+      summary: List Documents
+      operationId: list_documents_api_v1_documents_get
+      security:
+      - APIKeyCookie: []
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 200
+          minimum: 1
+          default: 50
+          title: Limit
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+          title: Offset
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Page_Document_'
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Not Found
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Conflict
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Request Entity Too Large
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Unprocessable Entity
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Internal Server Error
+        '502':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Bad Gateway
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Service Unavailable
+  /api/v1/documents/{id}:
+    get:
+      summary: Get Document
+      operationId: get_document_api_v1_documents__id__get
+      security:
+      - APIKeyCookie: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success_Document_'
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Not Found
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Conflict
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Request Entity Too Large
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Unprocessable Entity
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Internal Server Error
+        '502':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Bad Gateway
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Service Unavailable
+  /api/v1/documents/{id}/content:
+    get:
+      summary: Get Content
+      operationId: get_content_api_v1_documents__id__content_get
+      security:
+      - APIKeyCookie: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Id
+      responses:
+        '200':
+          description: Private content
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Not Found
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Conflict
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Request Entity Too Large
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Unprocessable Entity
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Internal Server Error
+        '502':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Bad Gateway
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Service Unavailable
+  /api/v1/documents/{id}/normalized:
+    get:
+      summary: Get Normalized
+      operationId: get_normalized_api_v1_documents__id__normalized_get
+      security:
+      - APIKeyCookie: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success_NormalizedDocument_'
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Not Found
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Conflict
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Request Entity Too Large
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Unprocessable Entity
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Internal Server Error
+        '502':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Bad Gateway
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Service Unavailable
+  /api/v1/documents/{id}/retries:
+    post:
+      summary: Retry Document
+      operationId: retry_document_api_v1_documents__id__retries_post
+      security:
+      - APIKeyCookie: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Id
+      responses:
+        '202':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success_Document_'
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Not Found
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Conflict
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Request Entity Too Large
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Unprocessable Entity
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Internal Server Error
+        '502':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Bad Gateway
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Service Unavailable
+  /api/v1/forms:
+    post:
+      summary: Create Form
+      operationId: create_form_api_v1_forms_post
+      security:
+      - APIKeyCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateForm'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success_FormDefinition_'
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Not Found
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Conflict
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Request Entity Too Large
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Unprocessable Entity
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Internal Server Error
+        '502':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Bad Gateway
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Service Unavailable
+    get:
+      summary: List Forms
+      operationId: list_forms_api_v1_forms_get
+      security:
+      - APIKeyCookie: []
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 200
+          minimum: 1
+          default: 50
+          title: Limit
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+          title: Offset
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Page_FormDefinition_'
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Not Found
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Conflict
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Request Entity Too Large
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Unprocessable Entity
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Internal Server Error
+        '502':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Bad Gateway
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Service Unavailable
+  /api/v1/forms/{id}:
+    get:
+      summary: Get Form
+      operationId: get_form_api_v1_forms__id__get
+      security:
+      - APIKeyCookie: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success_FormDefinition_'
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Not Found
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Conflict
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Request Entity Too Large
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Unprocessable Entity
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Internal Server Error
+        '502':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Bad Gateway
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Service Unavailable
+  /api/v1/profiles:
+    post:
+      summary: Create Profile
+      operationId: create_profile_api_v1_profiles_post
+      security:
+      - APIKeyCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProfileDefinition'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success_Profile_'
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Not Found
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Conflict
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Request Entity Too Large
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Unprocessable Entity
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Internal Server Error
+        '502':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Bad Gateway
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Service Unavailable
+    get:
+      summary: List Profiles
+      operationId: list_profiles_api_v1_profiles_get
+      security:
+      - APIKeyCookie: []
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 200
+          minimum: 1
+          default: 50
+          title: Limit
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+          title: Offset
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Page_Profile_'
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Not Found
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Conflict
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Request Entity Too Large
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Unprocessable Entity
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Internal Server Error
+        '502':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Bad Gateway
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Service Unavailable
+  /api/v1/profiles/{id}:
+    get:
+      summary: Get Profile
+      operationId: get_profile_api_v1_profiles__id__get
+      security:
+      - APIKeyCookie: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Id
+      - name: version
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+            minimum: 1
+          - type: 'null'
+          title: Version
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success_Profile_'
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Not Found
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Conflict
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Request Entity Too Large
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Unprocessable Entity
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Internal Server Error
+        '502':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Bad Gateway
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Service Unavailable
+  /api/v1/profiles/{id}/versions:
+    post:
+      summary: Create Version
+      operationId: create_version_api_v1_profiles__id__versions_post
+      security:
+      - APIKeyCookie: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProfileVersion'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success_Profile_'
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Not Found
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Conflict
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Request Entity Too Large
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Unprocessable Entity
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Internal Server Error
+        '502':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Bad Gateway
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Service Unavailable
+  /api/v1/extractions:
+    post:
+      summary: Create Extractions
+      operationId: create_extractions_api_v1_extractions_post
+      security:
+      - APIKeyCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateExtractions'
+      responses:
+        '202':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success_ExtractionBatch_'
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Not Found
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Conflict
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Request Entity Too Large
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Unprocessable Entity
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Internal Server Error
+        '502':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Bad Gateway
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Service Unavailable
+    get:
+      summary: List Extractions
+      operationId: list_extractions_api_v1_extractions_get
+      security:
+      - APIKeyCookie: []
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 200
+          minimum: 1
+          default: 50
+          title: Limit
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+          title: Offset
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Page_Extraction_'
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Not Found
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Conflict
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Request Entity Too Large
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Unprocessable Entity
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Internal Server Error
+        '502':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Bad Gateway
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Service Unavailable
+  /api/v1/extractions/{id}:
+    get:
+      summary: Get Extraction
+      operationId: get_extraction_api_v1_extractions__id__get
+      security:
+      - APIKeyCookie: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success_Extraction_'
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Not Found
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Conflict
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Request Entity Too Large
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Unprocessable Entity
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Internal Server Error
+        '502':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Bad Gateway
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Service Unavailable
+  /api/v1/extractions/{id}/retries:
+    post:
+      summary: Retry Extraction
+      operationId: retry_extraction_api_v1_extractions__id__retries_post
+      security:
+      - APIKeyCookie: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Id
+      responses:
+        '202':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success_Extraction_'
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Not Found
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Conflict
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Request Entity Too Large
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Unprocessable Entity
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Internal Server Error
+        '502':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Bad Gateway
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Service Unavailable
+  /api/v1/reviews/{extraction_id}:
+    get:
+      summary: Get Review
+      operationId: get_review_api_v1_reviews__extraction_id__get
+      security:
+      - APIKeyCookie: []
+      parameters:
+      - name: extraction_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Extraction Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success_Review_'
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Not Found
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Conflict
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Request Entity Too Large
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Unprocessable Entity
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Internal Server Error
+        '502':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Bad Gateway
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Service Unavailable
+    put:
+      summary: Save Review
+      operationId: save_review_api_v1_reviews__extraction_id__put
+      security:
+      - APIKeyCookie: []
+      parameters:
+      - name: extraction_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Extraction Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SaveReview'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success_Review_'
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Not Found
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Conflict
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Request Entity Too Large
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Unprocessable Entity
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Internal Server Error
+        '502':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Bad Gateway
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Service Unavailable
+  /api/v1/reviews/{extraction_id}/confirm:
+    post:
+      summary: Confirm Review
+      operationId: confirm_review_api_v1_reviews__extraction_id__confirm_post
+      security:
+      - APIKeyCookie: []
+      parameters:
+      - name: extraction_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Extraction Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfirmReview'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success_Review_'
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Not Found
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Conflict
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Request Entity Too Large
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Unprocessable Entity
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Internal Server Error
+        '502':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Bad Gateway
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Service Unavailable
+  /api/v1/submissions:
+    post:
+      summary: Create Submission
+      operationId: create_submission_api_v1_submissions_post
+      security:
+      - APIKeyCookie: []
+      parameters:
+      - name: idempotency-key
+        in: header
+        required: true
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 128
+          title: Idempotency-Key
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSubmission'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success_Submission_'
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Not Found
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Conflict
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Request Entity Too Large
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Unprocessable Entity
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Internal Server Error
+        '502':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Bad Gateway
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Service Unavailable
+        '202':
+          description: eGrant apply queued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success_Submission_'
+  /api/v1/submissions/{id}:
+    get:
+      summary: Get Submission
+      operationId: get_submission_api_v1_submissions__id__get
+      security:
+      - APIKeyCookie: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success_Submission_'
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Not Found
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Conflict
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Request Entity Too Large
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Unprocessable Entity
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Internal Server Error
+        '502':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Bad Gateway
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Service Unavailable
+  /api/v1/submissions/{id}/export:
+    get:
+      summary: Export Submission
+      operationId: export_submission_api_v1_submissions__id__export_get
+      security:
+      - APIKeyCookie: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Id
+      responses:
+        '200':
+          description: JSON attachment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubmissionPayload'
+          headers:
+            Content-Disposition:
+              schema:
+                type: string
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Not Found
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Conflict
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Request Entity Too Large
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Unprocessable Entity
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Internal Server Error
+        '502':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Bad Gateway
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: Service Unavailable
+components:
+  schemas:
+    Body_upload_documents_api_v1_documents_post:
+      properties:
+        files:
+          items:
+            type: string
+            contentMediaType: application/octet-stream
+          type: array
+          title: Files
+      type: object
+      required:
+      - files
+      title: Body_upload_documents_api_v1_documents_post
+    Capabilities:
+      properties:
+        ocrConfigured:
+          type: boolean
+          title: Ocrconfigured
+        aiConfigured:
+          type: boolean
+          title: Aiconfigured
+        egrantConfigured:
+          type: boolean
+          title: Egrantconfigured
+        mode:
+          type: string
+          enum:
+          - live
+          - fixture
+          title: Mode
+      additionalProperties: false
+      type: object
+      required:
+      - ocrConfigured
+      - aiConfigured
+      - egrantConfigured
+      - mode
+      title: Capabilities
+    ConfirmReview:
+      properties:
+        expectedRevision:
+          type: integer
+          minimum: 0.0
+          title: Expectedrevision
+      additionalProperties: false
+      type: object
+      required:
+      - expectedRevision
+      title: ConfirmReview
+    CreateExtractions:
+      properties:
+        documentIds:
+          items:
+            type: string
+            format: uuid
+          type: array
+          maxItems: 100
+          minItems: 1
+          title: Documentids
+        profileId:
+          type: string
+          format: uuid
+          title: Profileid
+        profileVersion:
+          type: integer
+          minimum: 1.0
+          title: Profileversion
+      additionalProperties: false
+      type: object
+      required:
+      - documentIds
+      - profileId
+      - profileVersion
+      title: CreateExtractions
+    CreateForm:
+      properties:
+        name:
+          type: string
+          maxLength: 200
+          minLength: 1
+          title: Name
+        definition:
+          additionalProperties: true
+          type: object
+          title: Definition
+      additionalProperties: false
+      type: object
+      required:
+      - name
+      - definition
+      title: CreateForm
+    CreateProfileVersion:
+      properties:
+        name:
+          type: string
+          maxLength: 200
+          minLength: 1
+          title: Name
+        documentKind:
+          type: string
+          title: Documentkind
+        formId:
+          type: string
+          format: uuid
+          title: Formid
+        scalarFields:
+          items:
+            $ref: '#/components/schemas/ProfileField'
+          type: array
+          title: Scalarfields
+        tableFields:
+          items:
+            $ref: '#/components/schemas/ProfileTable'
+          type: array
+          title: Tablefields
+        expectedVersion:
+          type: integer
+          minimum: 1.0
+          title: Expectedversion
+      additionalProperties: false
+      type: object
+      required:
+      - name
+      - documentKind
+      - formId
+      - scalarFields
+      - tableFields
+      - expectedVersion
+      title: CreateProfileVersion
+    CreateSubmission:
+      properties:
+        reviewId:
+          type: string
+          format: uuid
+          title: Reviewid
+        reviewRevision:
+          type: integer
+          minimum: 1.0
+          title: Reviewrevision
+        mode:
+          type: string
+          enum:
+          - export
+          - egrant
+          title: Mode
+        targetContext:
+          $ref: '#/components/schemas/TargetContext'
+        acknowledgeOverwrite:
+          type: boolean
+          title: Acknowledgeoverwrite
+      additionalProperties: false
+      type: object
+      required:
+      - reviewId
+      - reviewRevision
+      - mode
+      - targetContext
+      - acknowledgeOverwrite
+      title: CreateSubmission
+    Document:
+      properties:
+        id:
+          type: string
+          format: uuid
+          title: Id
+        filename:
+          type: string
+          title: Filename
+        mediaType:
+          type: string
+          title: Mediatype
+        status:
+          type: string
+          enum:
+          - uploaded
+          - processing
+          - ready
+          - failed
+          title: Status
+        contentHash:
+          type: string
+          pattern: ^[a-f0-9]{64}$
+          title: Contenthash
+        duplicateOf:
+          anyOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+          title: Duplicateof
+        createdAt:
+          type: string
+          format: date-time
+          title: Createdat
+        pageCount:
+          anyOf:
+          - type: integer
+            minimum: 1.0
+          - type: 'null'
+          title: Pagecount
+        warnings:
+          items:
+            $ref: '#/components/schemas/Warning'
+          type: array
+          title: Warnings
+        error:
+          anyOf:
+          - $ref: '#/components/schemas/DomainErrorDTO'
+          - type: 'null'
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - filename
+      - mediaType
+      - status
+      - contentHash
+      - duplicateOf
+      - createdAt
+      - pageCount
+      - warnings
+      - error
+      title: Document
+    DomainErrorDTO:
+      properties:
+        code:
+          type: string
+          title: Code
+        message:
+          type: string
+          title: Message
+        details:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          title: Details
+      additionalProperties: false
+      type: object
+      required:
+      - code
+      - message
+      title: DomainErrorDTO
+    ErrorEnvelope:
+      properties:
+        error:
+          $ref: '#/components/schemas/DomainErrorDTO'
+      additionalProperties: false
+      type: object
+      required:
+      - error
+      title: ErrorEnvelope
+    ExtractedField:
+      properties:
+        key:
+          type: string
+          title: Key
+        type:
+          type: string
+          enum:
+          - string
+          - decimal
+          - date
+          - boolean
+          - money
+          title: Type
+        value:
+          anyOf:
+          - type: string
+          - type: boolean
+          - $ref: '#/components/schemas/Money'
+          - type: 'null'
+          title: Value
+        status:
+          type: string
+          enum:
+          - found
+          - missing
+          - needs_review
+          title: Status
+        sources:
+          items:
+            $ref: '#/components/schemas/SourceRef'
+          type: array
+          title: Sources
+      additionalProperties: false
+      type: object
+      required:
+      - key
+      - type
+      - value
+      - status
+      - sources
+      title: ExtractedField
+    ExtractedRow:
+      properties:
+        rowId:
+          type: string
+          format: uuid
+          title: Rowid
+        cells:
+          items:
+            $ref: '#/components/schemas/ExtractedField'
+          type: array
+          title: Cells
+      additionalProperties: false
+      type: object
+      required:
+      - rowId
+      - cells
+      title: ExtractedRow
+    ExtractedTable:
+      properties:
+        key:
+          type: string
+          title: Key
+        rows:
+          items:
+            $ref: '#/components/schemas/ExtractedRow'
+          type: array
+          title: Rows
+      additionalProperties: false
+      type: object
+      required:
+      - key
+      - rows
+      title: ExtractedTable
+    Extraction:
+      properties:
+        id:
+          type: string
+          format: uuid
+          title: Id
+        documentId:
+          type: string
+          format: uuid
+          title: Documentid
+        profileId:
+          type: string
+          format: uuid
+          title: Profileid
+        profileVersion:
+          type: integer
+          minimum: 1.0
+          title: Profileversion
+        status:
+          type: string
+          enum:
+          - queued
+          - running
+          - ready
+          - failed
+          title: Status
+        mode:
+          type: string
+          enum:
+          - live
+          - fixture
+          title: Mode
+        fields:
+          items:
+            $ref: '#/components/schemas/ExtractedField'
+          type: array
+          title: Fields
+        tables:
+          items:
+            $ref: '#/components/schemas/ExtractedTable'
+          type: array
+          title: Tables
+        warnings:
+          items:
+            $ref: '#/components/schemas/Warning'
+          type: array
+          title: Warnings
+        error:
+          anyOf:
+          - $ref: '#/components/schemas/DomainErrorDTO'
+          - type: 'null'
+        createdAt:
+          type: string
+          format: date-time
+          title: Createdat
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - documentId
+      - profileId
+      - profileVersion
+      - status
+      - mode
+      - fields
+      - tables
+      - warnings
+      - error
+      - createdAt
+      title: Extraction
+    ExtractionBatch:
+      properties:
+        extractions:
+          items:
+            $ref: '#/components/schemas/QueuedExtraction'
+          type: array
+          title: Extractions
+      additionalProperties: false
+      type: object
+      required:
+      - extractions
+      title: ExtractionBatch
+    FormDefinition:
+      properties:
+        id:
+          type: string
+          format: uuid
+          title: Id
+        name:
+          type: string
+          title: Name
+        isIllustrative:
+          type: boolean
+          title: Isillustrative
+        originalJson:
+          additionalProperties: true
+          type: object
+          title: Originaljson
+        fields:
+          items:
+            $ref: '#/components/schemas/FormField'
+          type: array
+          title: Fields
+        tables:
+          items:
+            $ref: '#/components/schemas/FormTable'
+          type: array
+          title: Tables
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - name
+      - isIllustrative
+      - originalJson
+      - fields
+      - tables
+      title: FormDefinition
+    FormField:
+      properties:
+        tag:
+          type: string
+          title: Tag
+        label:
+          type: string
+          title: Label
+        type:
+          type: string
+          enum:
+          - string
+          - decimal
+          - date
+          - boolean
+          - money
+          title: Type
+        required:
+          type: boolean
+          title: Required
+        options:
+          anyOf:
+          - items:
+              $ref: '#/components/schemas/Option'
+            type: array
+          - type: 'null'
+          title: Options
+      additionalProperties: false
+      type: object
+      required:
+      - tag
+      - label
+      - type
+      - required
+      - options
+      title: FormField
+    FormTable:
+      properties:
+        tag:
+          type: string
+          title: Tag
+        label:
+          type: string
+          title: Label
+        columns:
+          items:
+            $ref: '#/components/schemas/FormField'
+          type: array
+          title: Columns
+      additionalProperties: false
+      type: object
+      required:
+      - tag
+      - label
+      - columns
+      title: FormTable
+    Login:
+      properties:
+        accessCode:
+          type: string
+          maxLength: 512
+          minLength: 1
+          title: Accesscode
+      additionalProperties: false
+      type: object
+      required:
+      - accessCode
+      title: Login
+    Money:
+      properties:
+        amount:
+          type: string
+          pattern: ^-?(0|[1-9][0-9]*)\.[0-9]+$
+          title: Amount
+        currency:
+          type: string
+          pattern: ^[A-Z]{3}$
+          title: Currency
+      additionalProperties: false
+      type: object
+      required:
+      - amount
+      - currency
+      title: Money
+    NormalizedDocument:
+      properties:
+        documentId:
+          type: string
+          format: uuid
+          title: Documentid
+        units:
+          items:
+            $ref: '#/components/schemas/SourceUnit'
+          type: array
+          title: Units
+      additionalProperties: false
+      type: object
+      required:
+      - documentId
+      - units
+      title: NormalizedDocument
+    Option:
+      properties:
+        key:
+          type: string
+          title: Key
+        label:
+          type: string
+          title: Label
+      additionalProperties: false
+      type: object
+      required:
+      - key
+      - label
+      title: Option
+    Page_Document_:
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/Document'
+          type: array
+          title: Data
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      - pagination
+      title: Page[Document]
+    Page_Extraction_:
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/Extraction'
+          type: array
+          title: Data
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      - pagination
+      title: Page[Extraction]
+    Page_FormDefinition_:
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/FormDefinition'
+          type: array
+          title: Data
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      - pagination
+      title: Page[FormDefinition]
+    Page_Profile_:
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/Profile'
+          type: array
+          title: Data
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      - pagination
+      title: Page[Profile]
+    Pagination:
+      properties:
+        limit:
+          type: integer
+          maximum: 200.0
+          minimum: 1.0
+          title: Limit
+          default: 50
+        offset:
+          type: integer
+          minimum: 0.0
+          title: Offset
+          default: 0
+        total:
+          type: integer
+          minimum: 0.0
+          title: Total
+      additionalProperties: false
+      type: object
+      required:
+      - total
+      title: Pagination
+    Profile:
+      properties:
+        name:
+          type: string
+          maxLength: 200
+          minLength: 1
+          title: Name
+        documentKind:
+          type: string
+          title: Documentkind
+        formId:
+          type: string
+          format: uuid
+          title: Formid
+        scalarFields:
+          items:
+            $ref: '#/components/schemas/ProfileField'
+          type: array
+          title: Scalarfields
+        tableFields:
+          items:
+            $ref: '#/components/schemas/ProfileTable'
+          type: array
+          title: Tablefields
+        id:
+          type: string
+          format: uuid
+          title: Id
+        version:
+          type: integer
+          minimum: 1.0
+          title: Version
+      additionalProperties: false
+      type: object
+      required:
+      - name
+      - documentKind
+      - formId
+      - scalarFields
+      - tableFields
+      - id
+      - version
+      title: Profile
+    ProfileDefinition:
+      properties:
+        name:
+          type: string
+          maxLength: 200
+          minLength: 1
+          title: Name
+        documentKind:
+          type: string
+          title: Documentkind
+        formId:
+          type: string
+          format: uuid
+          title: Formid
+        scalarFields:
+          items:
+            $ref: '#/components/schemas/ProfileField'
+          type: array
+          title: Scalarfields
+        tableFields:
+          items:
+            $ref: '#/components/schemas/ProfileTable'
+          type: array
+          title: Tablefields
+      additionalProperties: false
+      type: object
+      required:
+      - name
+      - documentKind
+      - formId
+      - scalarFields
+      - tableFields
+      title: ProfileDefinition
+    ProfileField:
+      properties:
+        key:
+          type: string
+          title: Key
+        label:
+          type: string
+          title: Label
+        type:
+          type: string
+          enum:
+          - string
+          - decimal
+          - date
+          - boolean
+          - money
+          title: Type
+        description:
+          type: string
+          title: Description
+        required:
+          type: boolean
+          title: Required
+        targetTag:
+          type: string
+          title: Targettag
+      additionalProperties: false
+      type: object
+      required:
+      - key
+      - label
+      - type
+      - description
+      - required
+      - targetTag
+      title: ProfileField
+    ProfileTable:
+      properties:
+        key:
+          type: string
+          title: Key
+        label:
+          type: string
+          title: Label
+        targetTag:
+          type: string
+          title: Targettag
+        writeMode:
+          type: string
+          enum:
+          - append
+          - replace
+          title: Writemode
+        columns:
+          items:
+            $ref: '#/components/schemas/ProfileField'
+          type: array
+          title: Columns
+      additionalProperties: false
+      type: object
+      required:
+      - key
+      - label
+      - targetTag
+      - writeMode
+      - columns
+      title: ProfileTable
+    QueuedExtraction:
+      properties:
+        id:
+          type: string
+          format: uuid
+          title: Id
+        documentId:
+          type: string
+          format: uuid
+          title: Documentid
+        status:
+          type: string
+          enum:
+          - queued
+          - running
+          - ready
+          - failed
+          title: Status
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - documentId
+      - status
+      title: QueuedExtraction
+    Review:
+      properties:
+        fields:
+          items:
+            $ref: '#/components/schemas/ReviewField'
+          type: array
+          title: Fields
+        tables:
+          items:
+            $ref: '#/components/schemas/ReviewTable'
+          type: array
+          title: Tables
+        acknowledgedWarnings:
+          items:
+            type: string
+            pattern: ^[a-f0-9]{64}$
+          type: array
+          title: Acknowledgedwarnings
+        extractionId:
+          type: string
+          format: uuid
+          title: Extractionid
+        revision:
+          type: integer
+          minimum: 0.0
+          title: Revision
+        status:
+          type: string
+          enum:
+          - draft
+          - confirmed
+          title: Status
+        confirmedAt:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Confirmedat
+      additionalProperties: false
+      type: object
+      required:
+      - fields
+      - tables
+      - acknowledgedWarnings
+      - extractionId
+      - revision
+      - status
+      - confirmedAt
+      title: Review
+    ReviewField:
+      properties:
+        key:
+          type: string
+          title: Key
+        value:
+          anyOf:
+          - type: string
+          - type: boolean
+          - $ref: '#/components/schemas/Money'
+          - type: 'null'
+          title: Value
+      additionalProperties: false
+      type: object
+      required:
+      - key
+      - value
+      title: ReviewField
+    ReviewRow:
+      properties:
+        rowId:
+          type: string
+          format: uuid
+          title: Rowid
+        cells:
+          items:
+            $ref: '#/components/schemas/ReviewField'
+          type: array
+          title: Cells
+      additionalProperties: false
+      type: object
+      required:
+      - rowId
+      - cells
+      title: ReviewRow
+    ReviewTable:
+      properties:
+        key:
+          type: string
+          title: Key
+        rows:
+          items:
+            $ref: '#/components/schemas/ReviewRow'
+          type: array
+          title: Rows
+      additionalProperties: false
+      type: object
+      required:
+      - key
+      - rows
+      title: ReviewTable
+    SaveReview:
+      properties:
+        fields:
+          items:
+            $ref: '#/components/schemas/ReviewField'
+          type: array
+          title: Fields
+        tables:
+          items:
+            $ref: '#/components/schemas/ReviewTable'
+          type: array
+          title: Tables
+        acknowledgedWarnings:
+          items:
+            type: string
+            pattern: ^[a-f0-9]{64}$
+          type: array
+          title: Acknowledgedwarnings
+        expectedRevision:
+          type: integer
+          minimum: 0.0
+          title: Expectedrevision
+      additionalProperties: false
+      type: object
+      required:
+      - fields
+      - tables
+      - acknowledgedWarnings
+      - expectedRevision
+      title: SaveReview
+    SessionInfo:
+      properties:
+        authenticated:
+          type: boolean
+          title: Authenticated
+        mode:
+          type: string
+          enum:
+          - live
+          - fixture
+          title: Mode
+      additionalProperties: false
+      type: object
+      required:
+      - authenticated
+      - mode
+      title: SessionInfo
+    SourceRef:
+      properties:
+        documentId:
+          type: string
+          format: uuid
+          title: Documentid
+        unitId:
+          type: string
+          title: Unitid
+        quote:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Quote
+        page:
+          anyOf:
+          - type: integer
+            minimum: 1.0
+          - type: 'null'
+          title: Page
+        sheet:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Sheet
+        cell:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Cell
+      additionalProperties: false
+      type: object
+      required:
+      - documentId
+      - unitId
+      - quote
+      - page
+      - sheet
+      - cell
+      title: SourceRef
+    SourceUnit:
+      properties:
+        id:
+          type: string
+          title: Id
+        text:
+          type: string
+          title: Text
+        page:
+          anyOf:
+          - type: integer
+            minimum: 1.0
+          - type: 'null'
+          title: Page
+        sheet:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Sheet
+        cell:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Cell
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - text
+      - page
+      - sheet
+      - cell
+      title: SourceUnit
+    Submission:
+      properties:
+        id:
+          type: string
+          format: uuid
+          title: Id
+        reviewId:
+          type: string
+          format: uuid
+          title: Reviewid
+        reviewRevision:
+          type: integer
+          minimum: 1.0
+          title: Reviewrevision
+        mode:
+          type: string
+          enum:
+          - export
+          - egrant
+          title: Mode
+        targetContext:
+          $ref: '#/components/schemas/TargetContext'
+        status:
+          type: string
+          enum:
+          - prepared
+          - exported
+          - applying
+          - applied
+          - failed
+          - unknown
+          title: Status
+        payload:
+          $ref: '#/components/schemas/SubmissionPayload'
+        externalReceipt:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          title: Externalreceipt
+        createdAt:
+          type: string
+          format: date-time
+          title: Createdat
+        error:
+          anyOf:
+          - $ref: '#/components/schemas/DomainErrorDTO'
+          - type: 'null'
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - reviewId
+      - reviewRevision
+      - mode
+      - targetContext
+      - status
+      - payload
+      - externalReceipt
+      - createdAt
+      - error
+      title: Submission
+    SubmissionField:
+      properties:
+        targetTag:
+          type: string
+          title: Targettag
+        value:
+          anyOf:
+          - type: string
+          - type: boolean
+          - $ref: '#/components/schemas/Money'
+          - type: 'null'
+          title: Value
+      additionalProperties: false
+      type: object
+      required:
+      - targetTag
+      - value
+      title: SubmissionField
+    SubmissionPayload:
+      properties:
+        formId:
+          type: string
+          format: uuid
+          title: Formid
+        profileId:
+          type: string
+          format: uuid
+          title: Profileid
+        profileVersion:
+          type: integer
+          minimum: 1.0
+          title: Profileversion
+        fields:
+          items:
+            $ref: '#/components/schemas/SubmissionField'
+          type: array
+          title: Fields
+        tables:
+          items:
+            $ref: '#/components/schemas/SubmissionTable'
+          type: array
+          title: Tables
+      additionalProperties: false
+      type: object
+      required:
+      - formId
+      - profileId
+      - profileVersion
+      - fields
+      - tables
+      title: SubmissionPayload
+    SubmissionRow:
+      properties:
+        rowId:
+          type: string
+          format: uuid
+          title: Rowid
+        values:
+          additionalProperties:
+            anyOf:
+            - type: string
+            - type: boolean
+            - $ref: '#/components/schemas/Money'
+            - type: 'null'
+          type: object
+          title: Values
+      additionalProperties: false
+      type: object
+      required:
+      - rowId
+      - values
+      title: SubmissionRow
+    SubmissionTable:
+      properties:
+        targetTag:
+          type: string
+          title: Targettag
+        writeMode:
+          type: string
+          enum:
+          - append
+          - replace
+          title: Writemode
+        rows:
+          items:
+            $ref: '#/components/schemas/SubmissionRow'
+          type: array
+          title: Rows
+      additionalProperties: false
+      type: object
+      required:
+      - targetTag
+      - writeMode
+      - rows
+      title: SubmissionTable
+    Success_Capabilities_:
+      properties:
+        data:
+          $ref: '#/components/schemas/Capabilities'
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      title: Success[Capabilities]
+    Success_Document_:
+      properties:
+        data:
+          $ref: '#/components/schemas/Document'
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      title: Success[Document]
+    Success_ExtractionBatch_:
+      properties:
+        data:
+          $ref: '#/components/schemas/ExtractionBatch'
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      title: Success[ExtractionBatch]
+    Success_Extraction_:
+      properties:
+        data:
+          $ref: '#/components/schemas/Extraction'
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      title: Success[Extraction]
+    Success_FormDefinition_:
+      properties:
+        data:
+          $ref: '#/components/schemas/FormDefinition'
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      title: Success[FormDefinition]
+    Success_NormalizedDocument_:
+      properties:
+        data:
+          $ref: '#/components/schemas/NormalizedDocument'
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      title: Success[NormalizedDocument]
+    Success_Profile_:
+      properties:
+        data:
+          $ref: '#/components/schemas/Profile'
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      title: Success[Profile]
+    Success_Review_:
+      properties:
+        data:
+          $ref: '#/components/schemas/Review'
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      title: Success[Review]
+    Success_SessionInfo_:
+      properties:
+        data:
+          $ref: '#/components/schemas/SessionInfo'
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      title: Success[SessionInfo]
+    Success_Submission_:
+      properties:
+        data:
+          $ref: '#/components/schemas/Submission'
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      title: Success[Submission]
+    Success_dict_str__str__:
+      properties:
+        data:
+          additionalProperties:
+            type: string
+          type: object
+          title: Data
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      title: Success[dict[str, str]]
+    Success_list_Document__:
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/Document'
+          type: array
+          title: Data
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      title: Success[list[Document]]
+    TargetContext:
+      properties:
+        applicationId:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Applicationid
+      additionalProperties: false
+      type: object
+      required:
+      - applicationId
+      title: TargetContext
+    Warning:
+      properties:
+        code:
+          type: string
+          title: Code
+        message:
+          type: string
+          title: Message
+        fieldKey:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Fieldkey
+        tableKey:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Tablekey
+        rowId:
+          anyOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+          title: Rowid
+      additionalProperties: false
+      type: object
+      required:
+      - code
+      - message
+      title: Warning
+  securitySchemes:
+    APIKeyCookie:
+      type: apiKey
+      in: cookie
+      name: egrant_session

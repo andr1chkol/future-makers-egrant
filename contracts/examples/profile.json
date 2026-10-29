@@ -1,0 +1,99 @@
+{
+  "id": "00000000-0000-4000-8000-000000000003",
+  "version": 1,
+  "name": "Ukážková faktúra",
+  "documentKind": "invoice",
+  "formId": "00000000-0000-4000-8000-000000000002",
+  "scalarFields": [
+    {
+      "key": "invoice_number",
+      "label": "Číslo faktúry",
+      "type": "string",
+      "description": "Číslo faktúry",
+      "required": true,
+      "targetTag": "invoice_number"
+    },
+    {
+      "key": "supplier",
+      "label": "Dodávateľ",
+      "type": "string",
+      "description": "Dodávateľ",
+      "required": true,
+      "targetTag": "supplier"
+    },
+    {
+      "key": "issue_date",
+      "label": "Dátum vystavenia",
+      "type": "date",
+      "description": "Dátum vystavenia",
+      "required": true,
+      "targetTag": "issue_date"
+    },
+    {
+      "key": "buyer",
+      "label": "Odberateľ",
+      "type": "string",
+      "description": "Odberateľ",
+      "required": true,
+      "targetTag": "buyer"
+    },
+    {
+      "key": "purchase_order",
+      "label": "Objednávka",
+      "type": "string",
+      "description": "Objednávka",
+      "required": false,
+      "targetTag": "purchase_order"
+    },
+    {
+      "key": "total",
+      "label": "Celková suma",
+      "type": "money",
+      "description": "Celková suma",
+      "required": true,
+      "targetTag": "total"
+    }
+  ],
+  "tableFields": [
+    {
+      "key": "items",
+      "label": "Položky",
+      "targetTag": "items",
+      "writeMode": "append",
+      "columns": [
+        {
+          "key": "description",
+          "label": "Popis",
+          "type": "string",
+          "description": "Popis",
+          "required": true,
+          "targetTag": "description"
+        },
+        {
+          "key": "quantity",
+          "label": "Množstvo",
+          "type": "decimal",
+          "description": "Množstvo",
+          "required": true,
+          "targetTag": "quantity"
+        },
+        {
+          "key": "unit_price",
+          "label": "Jednotková cena",
+          "type": "money",
+          "description": "Jednotková cena",
+          "required": true,
+          "targetTag": "unit_price"
+        },
+        {
+          "key": "line_total",
+          "label": "Suma",
+          "type": "money",
+          "description": "Suma",
+          "required": true,
+          "targetTag": "line_total"
+        }
+      ]
+    }
+  ]
+}

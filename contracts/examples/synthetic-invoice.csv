@@ -1,0 +1,4 @@
+invoiceNumber,supplier,issueDate,buyer,purchaseOrder,description,quantity,unitPriceEUR,totalEUR
+DEMO-2026-001,Demo Paper s.r.o.,2026-10-20,Demo Grant Association,,Workshop notebooks,2.00,12.50,25.00
+,,,,,Training materials,3.00,10.00,30.00
+,,,,,TOTAL,,,55.00

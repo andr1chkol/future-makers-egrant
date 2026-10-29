@@ -1,0 +1,268 @@
+{
+  "id": "00000000-0000-4000-8000-000000000004",
+  "documentId": "00000000-0000-4000-8000-000000000001",
+  "profileId": "00000000-0000-4000-8000-000000000003",
+  "profileVersion": 1,
+  "status": "ready",
+  "mode": "fixture",
+  "fields": [
+    {
+      "key": "invoice_number",
+      "type": "string",
+      "value": "DEMO-2026-001",
+      "status": "found",
+      "sources": [
+        {
+          "documentId": "00000000-0000-4000-8000-000000000001",
+          "unitId": "row-2",
+          "quote": "DEMO-2026-001",
+          "page": null,
+          "sheet": "invoice",
+          "cell": "A2:I2"
+        }
+      ]
+    },
+    {
+      "key": "supplier",
+      "type": "string",
+      "value": "Demo Paper s.r.o.",
+      "status": "found",
+      "sources": [
+        {
+          "documentId": "00000000-0000-4000-8000-000000000001",
+          "unitId": "row-2",
+          "quote": "Demo Paper s.r.o.",
+          "page": null,
+          "sheet": "invoice",
+          "cell": "A2:I2"
+        }
+      ]
+    },
+    {
+      "key": "issue_date",
+      "type": "date",
+      "value": "2026-10-20",
+      "status": "found",
+      "sources": [
+        {
+          "documentId": "00000000-0000-4000-8000-000000000001",
+          "unitId": "row-2",
+          "quote": "2026-10-20",
+          "page": null,
+          "sheet": "invoice",
+          "cell": "A2:I2"
+        }
+      ]
+    },
+    {
+      "key": "buyer",
+      "type": "string",
+      "value": "Demo Grant Association",
+      "status": "found",
+      "sources": [
+        {
+          "documentId": "00000000-0000-4000-8000-000000000001",
+          "unitId": "row-2",
+          "quote": "Demo Grant Association",
+          "page": null,
+          "sheet": "invoice",
+          "cell": "A2:I2"
+        }
+      ]
+    },
+    {
+      "key": "purchase_order",
+      "type": "string",
+      "value": null,
+      "status": "missing",
+      "sources": []
+    },
+    {
+      "key": "total",
+      "type": "money",
+      "value": {
+        "amount": "55.00",
+        "currency": "EUR"
+      },
+      "status": "found",
+      "sources": [
+        {
+          "documentId": "00000000-0000-4000-8000-000000000001",
+          "unitId": "row-4",
+          "quote": "55.00",
+          "page": null,
+          "sheet": "invoice",
+          "cell": "A4:I4"
+        }
+      ]
+    }
+  ],
+  "tables": [
+    {
+      "key": "items",
+      "rows": [
+        {
+          "rowId": "00000000-0000-4000-8000-000000000006",
+          "cells": [
+            {
+              "key": "description",
+              "type": "string",
+              "value": "Workshop notebooks",
+              "status": "found",
+              "sources": [
+                {
+                  "documentId": "00000000-0000-4000-8000-000000000001",
+                  "unitId": "row-2",
+                  "quote": "Workshop notebooks",
+                  "page": null,
+                  "sheet": "invoice",
+                  "cell": "A2:I2"
+                }
+              ]
+            },
+            {
+              "key": "quantity",
+              "type": "decimal",
+              "value": "2.00",
+              "status": "found",
+              "sources": [
+                {
+                  "documentId": "00000000-0000-4000-8000-000000000001",
+                  "unitId": "row-2",
+                  "quote": "2.00",
+                  "page": null,
+                  "sheet": "invoice",
+                  "cell": "A2:I2"
+                }
+              ]
+            },
+            {
+              "key": "unit_price",
+              "type": "money",
+              "value": {
+                "amount": "12.50",
+                "currency": "EUR"
+              },
+              "status": "found",
+              "sources": [
+                {
+                  "documentId": "00000000-0000-4000-8000-000000000001",
+                  "unitId": "row-2",
+                  "quote": "12.50",
+                  "page": null,
+                  "sheet": "invoice",
+                  "cell": "A2:I2"
+                }
+              ]
+            },
+            {
+              "key": "line_total",
+              "type": "money",
+              "value": {
+                "amount": "25.00",
+                "currency": "EUR"
+              },
+              "status": "found",
+              "sources": [
+                {
+                  "documentId": "00000000-0000-4000-8000-000000000001",
+                  "unitId": "row-2",
+                  "quote": "25.00",
+                  "page": null,
+                  "sheet": "invoice",
+                  "cell": "A2:I2"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "rowId": "00000000-0000-4000-8000-000000000007",
+          "cells": [
+            {
+              "key": "description",
+              "type": "string",
+              "value": "Training materials",
+              "status": "found",
+              "sources": [
+                {
+                  "documentId": "00000000-0000-4000-8000-000000000001",
+                  "unitId": "row-3",
+                  "quote": "Training materials",
+                  "page": null,
+                  "sheet": "invoice",
+                  "cell": "A3:I3"
+                }
+              ]
+            },
+            {
+              "key": "quantity",
+              "type": "decimal",
+              "value": "3.00",
+              "status": "found",
+              "sources": [
+                {
+                  "documentId": "00000000-0000-4000-8000-000000000001",
+                  "unitId": "row-3",
+                  "quote": "3.00",
+                  "page": null,
+                  "sheet": "invoice",
+                  "cell": "A3:I3"
+                }
+              ]
+            },
+            {
+              "key": "unit_price",
+              "type": "money",
+              "value": {
+                "amount": "10.00",
+                "currency": "EUR"
+              },
+              "status": "found",
+              "sources": [
+                {
+                  "documentId": "00000000-0000-4000-8000-000000000001",
+                  "unitId": "row-3",
+                  "quote": "10.00",
+                  "page": null,
+                  "sheet": "invoice",
+                  "cell": "A3:I3"
+                }
+              ]
+            },
+            {
+              "key": "line_total",
+              "type": "money",
+              "value": {
+                "amount": "30.00",
+                "currency": "EUR"
+              },
+              "status": "found",
+              "sources": [
+                {
+                  "documentId": "00000000-0000-4000-8000-000000000001",
+                  "unitId": "row-3",
+                  "quote": "30.00",
+                  "page": null,
+                  "sheet": "invoice",
+                  "cell": "A3:I3"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "warnings": [
+    {
+      "code": "MISSING_OPTIONAL_VALUE",
+      "message": "Purchase order is not provided",
+      "fieldKey": "purchase_order",
+      "tableKey": null,
+      "rowId": null
+    }
+  ],
+  "error": null,
+  "createdAt": "2026-10-29T10:00:00Z"
+}

@@ -1,0 +1,15 @@
+.env
+.env.*
+!.env.example
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+node_modules/
+dist/
+playwright-report/
+test-results/
+.private/
+.DS_Store
+.tools/
+docs/release/*.png
