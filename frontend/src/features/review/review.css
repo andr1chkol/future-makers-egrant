@@ -1,0 +1,245 @@
+.review-page {
+  overflow-wrap: anywhere;
+  max-width: 1600px;
+  min-width: 0;
+}
+.review-heading {
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+}
+.review-heading h1 {
+  margin-bottom: 14px;
+}
+.review-page h2 {
+  font-family: Georgia, serif;
+  font-size: 25px;
+  margin: 20px 0;
+}
+.review-page h3 {
+  font-weight: 700;
+  margin: 14px 0;
+}
+.review-page p {
+  line-height: 1.65;
+  margin-bottom: 14px;
+}
+.review-layout {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.8fr) minmax(0, 1.2fr);
+  gap: 28px;
+  align-items: start;
+}
+.review-source {
+  position: sticky;
+  top: 16px;
+  min-width: 0;
+  max-height: 85vh;
+  overflow: auto;
+  border-right: 1px solid var(--line);
+  padding-right: 22px;
+}
+.review-source iframe {
+  width: 100%;
+  height: 480px;
+  border: 1px solid var(--line);
+  margin: 16px 0;
+}
+.review-source img {
+  max-width: 100%;
+  height: auto;
+}
+.review-source a {
+  text-decoration: underline;
+}
+.review-source pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 14px;
+  line-height: 1.7;
+}
+.review-source blockquote {
+  border-left: 3px solid var(--accent);
+  padding: 12px;
+  background: #e7ede6;
+  overflow-wrap: anywhere;
+}
+.review-page fieldset {
+  border: 0;
+  padding: 0;
+  min-width: 0;
+}
+.review-editor {
+  min-width: 0;
+}
+.review-editor form {
+  margin-top: 0;
+}
+.review-field {
+  padding: 18px 0;
+  border-bottom: 1px solid var(--line);
+  display: grid;
+  gap: 8px;
+}
+.review-field label {
+  font-weight: 700;
+}
+.review-indicator,
+.review-page small {
+  font-size: 13px;
+  color: var(--muted);
+}
+.review-page small {
+  display: block;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.review-page select {
+  min-height: 44px;
+  padding: 10px;
+  border: 1px solid var(--muted);
+  border-radius: 3px;
+  background: white;
+  width: 100%;
+  font: inherit;
+}
+.review-page select:focus-visible,
+.review-page summary:focus-visible,
+.review-page [tabindex]:focus-visible {
+  outline: 3px solid #bf7726;
+  outline-offset: 4px;
+}
+.review-money {
+  display: grid;
+  grid-template-columns: minmax(90px, 1fr) 85px;
+  gap: 8px;
+}
+.review-toolbar {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin: 20px 0;
+}
+.review-check {
+  display: flex;
+  align-items: start;
+  gap: 10px;
+  padding: 12px 0;
+  min-height: 44px;
+  line-height: 1.6;
+}
+.review-check input[type="checkbox"] {
+  flex: 0 0 20px;
+  width: 20px;
+  height: 20px;
+  margin-top: 4px;
+  accent-color: var(--accent);
+}
+.review-source-links {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.review-source-links button,
+.review-page summary {
+  min-height: 44px;
+  text-decoration: underline;
+  cursor: pointer;
+  text-align: left;
+}
+.review-secondary {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--line);
+}
+.review-secondary:hover:not(:disabled) {
+  color: white;
+}
+.review-page .button {
+  margin: 8px 8px 8px 0;
+}
+.review-table {
+  margin: 28px 0;
+}
+.review-table-scroll {
+  overflow-x: auto;
+  max-width: 100%;
+}
+.review-table table {
+  border-collapse: collapse;
+  width: 100%;
+  text-align: left;
+}
+.review-table th,
+.review-table td {
+  position: relative;
+  border-bottom: 1px solid var(--line);
+  padding: 12px 8px;
+  vertical-align: top;
+}
+.review-table th {
+  min-width: 64px;
+  overflow-wrap: normal;
+}
+.review-table thead th:not(:first-child) {
+  min-width: 175px;
+}
+.review-table td {
+  min-width: 175px;
+}
+.review-confirm,
+.review-submission,
+.review-warnings {
+  border-top: 1px solid var(--line);
+  margin-top: 26px;
+  padding-top: 12px;
+}
+.review-error {
+  color: #9f2525;
+  border-left: 3px solid #9f2525;
+  padding: 12px;
+}
+.review-conflict {
+  border-left: 3px solid #bf7726;
+  padding: 18px;
+  background: #f4ead1;
+}
+.review-page dl > div {
+  border-bottom: 1px solid var(--line);
+  padding: 10px 0;
+}
+.review-page dt {
+  font-weight: 700;
+}
+.review-page dd {
+  overflow-wrap: anywhere;
+}
+.review-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+@media (max-width: 1150px) {
+  .review-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .review-source {
+    position: static;
+    max-height: 420px;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+    padding: 0 0 20px;
+  }
+}
+@media (max-width: 650px) {
+  .review-page h2 {
+    font-size: 23px;
+  }
+  .review-toolbar {
+    display: block;
+  }
+}
