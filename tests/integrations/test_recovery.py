@@ -91,3 +91,68 @@ def test_recovery_preserves_active_apply_lease(database):
         service.recover_interrupted_submissions(session)
     with database() as session:
         assert service.get_submission(session, id).status == "applying"
+
+
+@pytest.mark.parametrize(
+    "status,event", [("applying", "submission.unknown"), ("prepared", "submission.failed")]
+)
+def test_recovery_logs_keep_original_request_job_and_attempt(database, status, event):
+    correlation = str(uuid4())
+    token = request_id.set(correlation)
+    try:
+        id, job_id = seed_apply(database, status)
+    finally:
+        request_id.reset(token)
+    with database.begin() as session:
+        assert claim(session).id == job_id
+        session.get(Job, job_id).lease_until = datetime.now(UTC) - timedelta(seconds=1)
+    assert not run_once(database, build_registry())
+    output = io.StringIO()
+    handler = logging.StreamHandler(output)
+    handler.setFormatter(JsonFormatter())
+    logger.addHandler(handler)
+    try:
+        with database() as session:
+            service.recover_interrupted_submissions(session)
+    finally:
+        logger.removeHandler(handler)
+    record = next(
+        json.loads(line)
+        for line in output.getvalue().splitlines()
+        if json.loads(line)["event"] == event
+    )
+    assert record["submissionId"] == str(id)
+    assert record["requestId"] == correlation
+    assert record["jobId"] == str(job_id)
+    assert record["attempt"] == 1
+
+
+def test_recovery_logs_one_deterministic_failed_job_per_operation(database):
+    id, older_job_id = seed_apply(database, "applying")
+    correlation = str(uuid4())
+    token = request_id.set(correlation)
+    try:
+        with database.begin() as session:
+            newer_job_id = enqueue(session, "submission.apply", JobPayload(resource_id=id))
+            older = session.get(Job, older_job_id)
+            newer = session.get(Job, newer_job_id)
+            older.status = newer.status = "failed"
+            older.attempt = newer.attempt = 1
+            older.created_at = datetime.now(UTC) - timedelta(minutes=1)
+            newer.created_at = datetime.now(UTC)
+    finally:
+        request_id.reset(token)
+    output = io.StringIO()
+    handler = logging.StreamHandler(output)
+    handler.setFormatter(JsonFormatter())
+    logger.addHandler(handler)
+    try:
+        with database() as session:
+            service.recover_interrupted_submissions(session)
+    finally:
+        logger.removeHandler(handler)
+    events = [json.loads(line) for line in output.getvalue().splitlines()]
+    assert len(events) == 1
+    assert events[0]["submissionId"] == str(id)
+    assert events[0]["requestId"] == correlation
+    assert events[0]["jobId"] == str(newer_job_id)
