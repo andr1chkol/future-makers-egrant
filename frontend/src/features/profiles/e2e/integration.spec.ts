@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 
 test("persists two distinct manager configurations through the real API and PostgreSQL", async ({
   page,
-}) => {
+}, testInfo) => {
   // The test harness assembles the real profiles router with shared access and errors.
   // No forms/profile HTTP response is mocked; the extractor remains a visible 503 shell.
   const profiles: string[] = [];
@@ -113,7 +113,7 @@ test("persists two distinct manager configurations through the real API and Post
     if (index === 0) {
       await page.setViewportSize({ width: 1440, height: 1000 });
       await page.screenshot({
-        path: "/private/tmp/egrant-profiles-desktop.png",
+        path: testInfo.outputPath("egrant-profiles-desktop.png"),
         fullPage: true,
       });
       await page.setViewportSize({ width: 375, height: 900 });
@@ -121,7 +121,7 @@ test("persists two distinct manager configurations through the real API and Post
         .getByLabel("Názov extrahovaného poľa 1", { exact: true })
         .scrollIntoViewIfNeeded();
       await page.screenshot({
-        path: "/private/tmp/egrant-profiles-mobile.png",
+        path: testInfo.outputPath("egrant-profiles-mobile.png"),
       });
       expect(
         await page.evaluate(
