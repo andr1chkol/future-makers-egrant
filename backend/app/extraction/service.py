@@ -41,6 +41,7 @@ from app.platform.contracts import (
 from app.platform.errors import ConflictError, DomainError, NotFoundError, ValidationError
 from app.platform.jobs import JobPayload, enqueue
 from app.platform.logging import log
+from app.platform.models import Job
 from app.platform.settings import get_settings
 
 # Matches the platform's attempt limit for extraction.process jobs.
@@ -50,6 +51,8 @@ MAX_ATTEMPTS = 3
 # worker died on the last attempt, or a rolled-back claim let the job's attempt
 # count run ahead of the run's. Such runs may be retried like failed ones.
 STALE_AFTER = timedelta(minutes=5)
+# Runs examined per recovery sweep; the worker calls the sweep on every polling cycle.
+RECOVERY_BATCH_SIZE = 50
 
 FAILURE_MESSAGES = {
     "AI_TIMEOUT": "The AI provider did not answer in time",
@@ -65,6 +68,7 @@ FAILURE_MESSAGES = {
     "DOCUMENT_UNAVAILABLE": "The document is no longer available for extraction",
     "FIXTURE_NOT_AVAILABLE": "Fixture mode has no recorded result for this document and profile",
     "EXTRACTION_INTERNAL_ERROR": "Extraction failed unexpectedly",
+    "EXTRACTION_INTERRUPTED": "Processing stopped before a result was stored",
 }
 
 
@@ -215,6 +219,75 @@ def retry_extraction(session: Session, id: UUID) -> Extraction:
         session.flush()
         session.refresh(record)
         return to_dto(record)
+
+
+def recover_terminal_extractions(session: Session) -> None:
+    """Fail runs left queued or running after their job ended for good.
+
+    The platform fails a job without calling the handler when its last lease
+    expires, and after the handler raised on the queue's last attempt. Either way
+    the run keeps its queued or running status with nothing left to process it.
+    The member 5 worker calls this sweep on every polling cycle with a fresh
+    session.
+
+    A run is failed only when none of its extraction.process jobs is queued or
+    running and the latest one has failed. A newer manual retry is therefore left
+    alone. The attempt count is kept and no job is enqueued, so recovery never
+    starts another paid provider call. Clearing the run token fences a worker that
+    is still waiting on the provider.
+    """
+    recovered = []
+    with session.begin():
+        records = session.scalars(
+            select(ExtractionRecord)
+            .where(ExtractionRecord.status.in_(("queued", "running")))
+            .order_by(ExtractionRecord.updated_at, ExtractionRecord.id)
+            .limit(RECOVERY_BATCH_SIZE)
+            .with_for_update(skip_locked=True)
+        ).all()
+        jobs = jobs_by_extraction(session, [record.id for record in records])
+        error = DomainErrorDTO(
+            code="EXTRACTION_INTERRUPTED", message=FAILURE_MESSAGES["EXTRACTION_INTERRUPTED"]
+        ).model_dump(mode="json", by_alias=True)
+        for record in records:
+            history = jobs.get(record.id, [])
+            if not history or any(job.status in {"queued", "running"} for job in history):
+                continue
+            latest = history[-1]
+            if latest.status != "failed":
+                continue
+            record.status, record.run_token, record.error = "failed", None, error
+            recovered.append((record.id, record.document_id, latest))
+    for extraction_id, document_id, job in recovered:
+        correlation = {"requestId": job.request_id} if job.request_id else {}
+        log(
+            "extraction.failed",
+            level=logging.ERROR,
+            errorCode="EXTRACTION_INTERRUPTED",
+            extractionId=extraction_id,
+            documentId=document_id,
+            jobId=job.id,
+            attempt=job.attempt,
+            **correlation,
+        )
+
+
+def jobs_by_extraction(session: Session, ids: list[UUID]) -> dict[UUID, list[Job]]:
+    """Each run's extraction.process jobs, oldest first."""
+    if not ids:
+        return {}
+    jobs = session.scalars(
+        select(Job)
+        .where(
+            Job.kind == "extraction.process",
+            Job.payload["resource_id"].astext.in_([str(id) for id in ids]),
+        )
+        .order_by(Job.created_at, Job.id)
+    )
+    history: dict[UUID, list[Job]] = {}
+    for job in jobs:
+        history.setdefault(UUID(job.payload["resource_id"]), []).append(job)
+    return history
 
 
 def process_extraction(

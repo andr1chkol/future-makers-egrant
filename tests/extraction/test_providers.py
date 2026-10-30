@@ -1,5 +1,8 @@
 import io
 import json
+import threading
+import time
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.error import HTTPError, URLError
 
 import pytest
@@ -187,3 +190,51 @@ def test_fixture_survives_relabelled_profiles_but_not_new_fields():
     extended.scalar_fields.append(extended.scalar_fields[0].model_copy(update={"key": "extra"}))
     with pytest.raises(ProviderError):
         FixtureProvider().extract(extended, {}, document)
+
+
+@pytest.fixture
+def local_server(monkeypatch):
+    """A real HTTP server standing in for the Responses API, sending its body in chunks."""
+    servers = []
+
+    def start(body: bytes, pause: float):
+        class Handler(BaseHTTPRequestHandler):
+            def do_POST(self):
+                self.rfile.read(int(self.headers["Content-Length"]))
+                self.send_response(200)
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                for start in range(0, len(body), 16):
+                    self.wfile.write(body[start : start + 16])
+                    self.wfile.flush()
+                    time.sleep(pause)
+
+            def log_message(self, *args):
+                pass
+
+        server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+        threading.Thread(target=server.serve_forever, daemon=True).start()
+        servers.append(server)
+        monkeypatch.setattr(
+            providers, "OPENAI_RESPONSES_URL", f"http://127.0.0.1:{server.server_port}/"
+        )
+
+    yield start
+    for server in servers:
+        server.shutdown()
+
+
+def test_a_slowly_sent_reply_times_out_at_the_overall_deadline(local_server, monkeypatch):
+    # Every chunk arrives well within the socket timeout; only the total is too long.
+    local_server(json.dumps(completed("{}")).encode(), pause=0.2)
+    monkeypatch.setattr(providers, "PROVIDER_TIMEOUT_SECONDS", 0.5)
+    started = time.monotonic()
+    with pytest.raises(ProviderError) as raised:
+        provider().extract(example_profile(), {}, example_document())
+    assert (raised.value.code, raised.value.retryable) == ("AI_TIMEOUT", True)
+    assert time.monotonic() - started < 1.5
+
+
+def test_a_prompt_reply_passes_through_the_deadline_guard(local_server):
+    local_server(json.dumps(completed('{"ok": true}')).encode(), pause=0)
+    assert provider().extract(example_profile(), {}, example_document()) == '{"ok": true}'

@@ -7,6 +7,7 @@ text or response bodies.
 """
 
 import json
+import threading
 from dataclasses import dataclass
 from hashlib import sha256
 from pathlib import Path
@@ -20,7 +21,8 @@ from app.platform.settings import Settings
 
 OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses"
 # The worker lease is 60 seconds without renewal (contracts/internal.md). The
-# provider call must finish well inside it, leaving time for both transactions.
+# whole provider call, including reading the body, must end within this deadline,
+# leaving time for the claim and persist transactions.
 PROVIDER_TIMEOUT_SECONDS = 40
 MAX_DOCUMENT_CHARACTERS = 200_000
 FIXTURE_DIRECTORY = Path(__file__).parent / "fixtures"
@@ -129,10 +131,7 @@ class OpenAIProvider:
             method="POST",
         )
         try:
-            # Without streaming the server sends nothing until the reply is complete,
-            # so the socket timeout bounds the whole call.
-            with urlopen(request, timeout=PROVIDER_TIMEOUT_SECONDS) as response:
-                payload = json.load(response)
+            payload = post_within(request, PROVIDER_TIMEOUT_SECONDS)
         except HTTPError as error:
             error.close()
             raise provider_error_for_status(error.code) from None
@@ -147,6 +146,34 @@ class OpenAIProvider:
         except (json.JSONDecodeError, UnicodeDecodeError):
             raise ProviderError("AI_UPSTREAM_ERROR", retryable=True) from None
         return reply_text(payload)
+
+
+def post_within(request: Request, seconds: float) -> object:
+    """Send the request and decode the JSON reply, giving up after `seconds` in total.
+
+    The urlopen timeout applies to each socket operation, so a server that sends
+    its body slowly could keep a call alive far past the lease. The call runs in
+    a daemon thread instead and is abandoned at the deadline. The abandoned
+    thread holds no database state, its result is discarded, and its own socket
+    timeout ends it.
+    """
+    outcome: dict = {}
+
+    def call():
+        try:
+            with urlopen(request, timeout=seconds) as response:
+                outcome["payload"] = json.load(response)
+        except Exception as error:
+            outcome["error"] = error
+
+    worker = threading.Thread(target=call, name="openai-request", daemon=True)
+    worker.start()
+    worker.join(seconds)
+    if worker.is_alive():
+        raise TimeoutError
+    if "error" in outcome:
+        raise outcome["error"]
+    return outcome["payload"]
 
 
 def provider_error_for_status(status: int) -> ProviderError:

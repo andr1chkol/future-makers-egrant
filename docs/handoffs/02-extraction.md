@@ -65,6 +65,7 @@ get_extraction(session, id: UUID) -> Extraction
 list_extractions(session, limit: int, offset: int) -> tuple[list[Extraction], int]
 retry_extraction(session, id: UUID) -> Extraction
 process_extraction(session, id: UUID, provider: ExtractionProvider | None = None) -> None
+recover_terminal_extractions(session) -> None
 ```
 
 - `create_extractions` owns its transaction. It reads the profile via
@@ -96,7 +97,10 @@ response schemas are tested against the frozen `contracts/api.yaml`.
    the router in front of the shells (`tests/extraction/test_lifecycle.py::assembled_app`).
 2. **Worker:** in `app.worker.build_registry`, register
    `registry.register_handler("extraction.process", process_extraction)`
-   from `app.extraction.service`.
+   from `app.extraction.service`. In the polling loop, call
+   `recover_terminal_extractions(session)` with a fresh session next to
+   `recover_interrupted_submissions`, as recorded in `contracts/internal.md` on
+   `codex/integration`.
 3. **Migrations:** `0201_extractions` (down revision `0001_platform`) creates the
    table `extractions`. Alembic `env.py` does not need my models; the migration is
    explicit. **`tests/platform/test_jobs.py::test_migration_and_transactional_enqueue`
@@ -130,8 +134,11 @@ The job runs in three phases, and the provider is never called inside a transact
 1. Short transaction with `SELECT … FOR UPDATE`: skip runs that are already
    `ready`/`failed` (duplicate delivery), otherwise mark `running`, increment
    `attempt` and set a fresh `run_token`.
-2. Provider call with a 40-second timeout, inside the 60-second lease that has no
-   renewal. Inputs over 200,000 characters fail with `DOCUMENT_TOO_LARGE` before any call.
+2. Provider call with a 40-second overall deadline, inside the 60-second lease that
+   has no renewal. The urlopen timeout only bounds each socket operation, so the
+   request runs in a daemon thread that is abandoned at the deadline
+   (`providers.post_within`); a reply sent slowly in small chunks still ends with
+   `AI_TIMEOUT` (tested against a local server). Inputs over 200,000 characters fail with `DOCUMENT_TOO_LARGE` before any call.
 3. Short transaction that writes the result only
    `WHERE run_token = <mine> AND status = 'running'`. A worker whose lease was
    reclaimed loses the token and discards its result. Tested, including two
@@ -239,9 +246,9 @@ Against PostgreSQL 16 (`docker.io/library/postgres:16` under podman) with
 
 | Command | Result |
 |---|---|
-| `uv run pytest tests/extraction` | 134 passed, 1 skipped (live test, not enabled) |
-| `EXTRACTION_LIVE_TEST=1 OPENAI_MODEL=gpt-4.1-mini uv run pytest tests/extraction/test_live_provider.py` | 1 passed (paid live call, synthetic invoice) |
-| `uv run pytest` | 165 passed, 1 skipped, **1 failed**: `test_migration_and_transactional_enqueue` (request 3) |
+| `uv run pytest tests/extraction` | 145 passed, 1 skipped (live test, not enabled) |
+| `EXTRACTION_LIVE_TEST=1 OPENAI_MODEL=gpt-4.1-mini uv run pytest tests/extraction/test_live_provider.py` | 1 passed (paid live call, synthetic invoice; repeated after the deadline change) |
+| `uv run pytest` | 176 passed, 1 skipped, **1 failed**: `test_migration_and_transactional_enqueue` (request 3) |
 | `uv run ruff check backend scripts tests` | passed |
 | `uv run ruff format --check backend scripts tests` | passed |
 | `uv lock --check` | passed |
@@ -258,19 +265,26 @@ or `uv run pytest tests/extraction/test_lifecycle.py -k worker_produces`.
 
 ## Limits and known risks
 
-- **Runs can be left `running` or `queued` without a job; they recover only by a
-  manual retry.** If the worker dies during attempt 3, the platform marks the job
-  `LEASE_EXHAUSTED` without calling the handler, and the run stays `running`. If a
-  claim transaction rolls back (for example a database error while loading the
-  document) or the worker dies between claiming the job and claiming the run, the
-  job's attempt count runs ahead of the run's; on the job's last attempt the handler
-  still raises `ExtractionRetryScheduled`, the platform fails the job, and the run
-  stays `queued`. After `STALE_AFTER` both can be retried through
-  `POST /extractions/{id}/retries`, and the old job cannot overwrite the new attempt
-  (tested). Nothing retries them automatically: a platform failure hook or a periodic
-  sweep (member 5) would close the gap without a user action. A run waiting more than
-  five minutes in a long job queue also counts as stale; retrying it only adds a
-  second job, and whichever finishes second skips the finished run.
+- **Runs whose job ended for good.** If the worker dies during attempt 3, the
+  platform marks the job `LEASE_EXHAUSTED` without calling the handler, and the run
+  stays `running`. If a claim transaction rolls back or the worker dies between
+  claiming the job and claiming the run, the job's attempt count runs ahead of the
+  run's; on the job's last attempt the handler still raises
+  `ExtractionRetryScheduled`, the platform fails the job, and the run stays `queued`.
+  `recover_terminal_extractions` fails such runs with `EXTRACTION_INTERRUPTED` once
+  none of their jobs is queued or running and the latest one has failed. It locks a
+  batch of 50 rows with `SKIP LOCKED`, keeps `attempt`, clears `run_token` so a late
+  worker is fenced, enqueues nothing, and logs `extraction.failed` after commit with
+  the job's `requestId`, `jobId` and `attempt`. Tested in
+  `tests/extraction/test_recovery.py`: final-lease crash, re-queued run on the last
+  job attempt, newer active retry left alone, finished run untouched, row locked by a
+  concurrent retry skipped, late worker fenced, repeat sweep is a no-op, batch bound,
+  correlated logs without document text. **It runs only once member 5 calls it from
+  the worker loop.** Until then, and as a user action afterwards, runs untouched for
+  `STALE_AFTER` (5 minutes) can be retried through `POST /extractions/{id}/retries`.
+  A run waiting more than five minutes in a long job queue also counts as stale;
+  retrying it only adds a second job, and whichever finishes second skips the
+  finished run.
 - Rate limits use the platform backoff (2 s, 4 s) and ignore `Retry-After`. A
   sustained 429 exhausts the three attempts quickly; the user can retry later.
 - If the model returns ISO dates instead of the printed form, the value is
