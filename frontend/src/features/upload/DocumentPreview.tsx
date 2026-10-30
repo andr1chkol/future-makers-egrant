@@ -5,6 +5,7 @@ import { useSearchParams } from "react-router-dom";
 import { api } from "../../shared/api";
 import { Notice } from "../../shared/ui";
 import { errorMessage } from "./errors";
+import { sourceContainsCell } from "./sourceLocation";
 
 export function DocumentPreview({
   id,
@@ -98,7 +99,7 @@ export function DocumentPreview({
         (!search.get("page") || unit.page === page) &&
         (!search.get("unit") || unit.id === search.get("unit")) &&
         (!sheet || unit.sheet === sheet) &&
-        (!cell || unit.cell?.toUpperCase() === cell.toUpperCase()),
+        sourceContainsCell(unit.cell, cell),
     ) ?? [];
   return (
     <section className="upload-preview" aria-label="Náhľad dokumentu">

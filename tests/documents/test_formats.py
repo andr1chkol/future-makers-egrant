@@ -1,6 +1,8 @@
 import io
+import json
 import subprocess
 import zipfile
+from pathlib import Path
 from uuid import uuid4
 
 import pytest
@@ -96,13 +98,10 @@ def test_xlsx_reads_cached_formula_without_execution():
 
 def test_csv_blank_rows_preserve_cell_positions(csv_content):
     result = parse_document(csv_content, "text/csv", uuid4())
-    assert [(unit.sheet, unit.cell, unit.text) for unit in result.units] == [
-        ("CSV", "A1", "name"),
-        ("CSV", "B1", "amount"),
-        ("CSV", "A2", "Žiadosť"),
-        ("CSV", "B2", "12.50"),
-        ("CSV", "A4", "Druhý"),
-        ("CSV", "B4", "20.00"),
+    assert [(unit.id, unit.sheet, unit.cell, unit.text) for unit in result.units] == [
+        ("row-1", "CSV", "A1:B1", "name,amount"),
+        ("row-2", "CSV", "A2:B2", "Žiadosť,12.50"),
+        ("row-4", "CSV", "A4:B4", "Druhý,20.00"),
     ]
     assert all(unit.page is None for unit in result.units)
 
@@ -112,9 +111,37 @@ def test_csv_encodings_and_quoted_multiline(encoding):
     result = parse_document(
         'name;value\n"Two\nlines";Žiadosť\n'.encode(encoding), "text/csv", uuid4()
     )
-    assert [(unit.cell, unit.text) for unit in result.units][-2:] == [
-        ("A2", "Two\nlines"),
-        ("B2", "Žiadosť"),
+    assert result.units[1].cell == "A2:B2"
+    assert result.units[1].text == '"Two\nlines";Žiadosť'
+
+
+def test_synthetic_csv_matches_extraction_fixture_sources():
+    root = Path(__file__).resolve().parents[2]
+    reference = json.loads(
+        (root / "contracts/examples/normalized-document.json").read_text(encoding="utf-8")
+    )
+    content = (root / "contracts/examples/synthetic-invoice.csv").read_bytes()
+    document_id = uuid4()
+    result = parse_document(content, "text/csv", document_id)
+    # Extraction's recorded-provider fingerprint uses unit IDs and original text, not sheet aliases.
+    assert [[unit.id, unit.text] for unit in result.units] == [
+        [unit["id"], unit["text"]] for unit in reference["units"]
+    ]
+    assert [(unit.page, unit.cell) for unit in result.units] == [
+        (unit["page"], unit["cell"]) for unit in reference["units"]
+    ]
+    assert result.units == parse_document(content, "text/csv", document_id).units
+    assert {unit.sheet for unit in result.units} == {"CSV"}
+
+
+@pytest.mark.parametrize("newline", ["\n", "\r\n", "\r"])
+def test_csv_preserves_original_quoting_and_record_boundaries(newline):
+    row = f'"first{newline}second","quoted ""value"""'
+    content = f"name,value{newline}{row}{newline}".encode()
+    result = parse_document(content, "text/csv", uuid4())
+    assert [(unit.id, unit.cell, unit.text) for unit in result.units] == [
+        ("row-1", "A1:B1", "name,value"),
+        ("row-2", "A2:B2", row),
     ]
 
 

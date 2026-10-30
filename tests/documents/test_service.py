@@ -5,6 +5,7 @@ import os
 import threading
 from concurrent.futures import ThreadPoolExecutor
 from datetime import timedelta
+from pathlib import Path
 from uuid import uuid4
 
 import pytest
@@ -59,8 +60,8 @@ def test_real_csv_upload_process_read_and_immutable_sources(
         sources = service.get_normalized(session, document.id)
         assert original == csv_content
         assert document.status == "ready"
-        assert sources.document_id == document.id and len(sources.units) == 6
-        assert session.scalar(select(func.count()).select_from(StoredSourceUnit)) == 6
+        assert sources.document_id == document.id and len(sources.units) == 3
+        assert session.scalar(select(func.count()).select_from(StoredSourceUnit)) == 3
     with document_database() as session:
         service.process_document(session, document.id)
     with document_database() as session:
@@ -158,7 +159,7 @@ def test_restart_reclaims_lease_without_duplicate_sources(
     with document_database() as session:
         assert service.get_document(session, document.id).status == "ready"
         assert session.get(StoredDocument, document.id).attempts == 2
-        assert session.scalar(select(func.count()).select_from(StoredSourceUnit)) == 6
+        assert session.scalar(select(func.count()).select_from(StoredSourceUnit)) == 3
 
 
 def test_terminal_worker_crash_is_persisted_as_failure(document_database, csv_content):
@@ -208,7 +209,7 @@ def test_late_worker_cannot_publish_after_reclaimed_job(
         assert stale_worker.result(timeout=15)
     with document_database() as session:
         assert service.get_document(session, document.id).status == "ready"
-        assert session.scalar(select(func.count()).select_from(StoredSourceUnit)) == 6
+        assert session.scalar(select(func.count()).select_from(StoredSourceUnit)) == 3
 
 
 def test_no_database_transaction_while_parsing(
@@ -406,3 +407,50 @@ def test_stored_content_hash_mismatch_never_publishes_sources(
     assert read(document_database, document.id).error.code == "CONTENT_HASH_MISMATCH"
     with document_database() as session:
         assert session.scalar(select(func.count()).select_from(StoredSourceUnit)) == 0
+
+
+def test_synthetic_csv_public_sources_match_extraction_after_processing(
+    document_database,
+    storage_compatibility,
+):
+    root = Path(__file__).resolve().parents[2]
+    content = (root / "contracts/examples/synthetic-invoice.csv").read_bytes()
+    expected = json.loads(
+        (root / "contracts/examples/normalized-document.json").read_text(encoding="utf-8")
+    )
+    document = upload(document_database, content, "synthetic-invoice.csv")
+    assert run_once(document_database, registry())
+    with document_database() as session:
+        normalized = service.get_normalized(session, document.id)
+        assert normalized.document_id == document.id
+        assert [(unit.id, unit.text, unit.page, unit.cell) for unit in normalized.units] == [
+            (unit["id"], unit["text"], unit["page"], unit["cell"]) for unit in expected["units"]
+        ]
+        assert {unit.sheet for unit in normalized.units} == {"CSV"}
+
+
+def test_ready_legacy_csv_units_are_not_rewritten_by_new_row_policy(
+    document_database,
+    csv_content,
+):
+    document = upload(document_database, csv_content)
+    legacy_id = str(uuid4())
+    with document_database.begin() as session:
+        session.get(StoredDocument, document.id).status = "ready"
+        session.add(
+            StoredSourceUnit(
+                document_id=document.id,
+                id=legacy_id,
+                ordinal=0,
+                text="name",
+                page=None,
+                sheet="CSV",
+                cell="A1",
+            )
+        )
+    assert run_once(document_database, registry())
+    with document_database() as session:
+        sources = service.get_normalized(session, document.id)
+        assert [(unit.id, unit.cell, unit.text) for unit in sources.units] == [
+            (legacy_id, "A1", "name")
+        ]

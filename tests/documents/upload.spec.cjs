@@ -42,10 +42,12 @@ test("real upload, partial rejection, source preview, retry, refresh and separat
     page.getByRole("heading", { name: "Zdrojové údaje" }),
   ).toBeVisible();
   await expect(
-    page.getByText("Original source", { exact: true }),
+    page.getByText("Original source,12.50", { exact: true }),
   ).toBeVisible();
   await page.getByLabel("Bunka", { exact: true }).fill("B2");
-  await expect(page.getByText("12.50", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText("Original source,12.50", { exact: true }),
+  ).toBeVisible();
   await page.getByRole("button", { name: "Zavrieť náhľad" }).click();
   await page.reload();
   await expect(page.getByText("Pripravený", { exact: true })).toHaveCount(2);

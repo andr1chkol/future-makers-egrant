@@ -68,7 +68,7 @@ def normalize(
     character_count = 0
     recognize = ocr or configured_ocr(settings)
 
-    def add(text: str, *, page=None, sheet=None, cell=None):
+    def add(text: str, *, page=None, sheet=None, cell=None, unit_id=None):
         nonlocal character_count
         character_count += len(text)
         if character_count > settings.max_text_chars or len(result.units) >= settings.max_cells:
@@ -76,7 +76,7 @@ def normalize(
         location = f"page:{page}" if page is not None else f"sheet:{sheet}:cell:{cell}"
         result.units.append(
             SourceUnit(
-                id=str(uuid5(document_id, location)),
+                id=unit_id or str(uuid5(document_id, location)),
                 text=text,
                 page=page,
                 sheet=sheet,
@@ -169,10 +169,13 @@ def normalize(
         cells = 0
         from openpyxl.utils import get_column_letter
 
+        stream = io.StringIO(text, newline="")
+        record_start = 0
         try:
-            for row_number, row in enumerate(
-                csv.reader(io.StringIO(text, newline=""), dialect, strict=True), 1
-            ):
+            for row_number, row in enumerate(csv.reader(stream, dialect, strict=True), 1):
+                record_end = stream.tell()
+                row_text = text[record_start:record_end].removesuffix("\n").removesuffix("\r")
+                record_start = record_end
                 if row_number > settings.max_rows:
                     reject("ROW_LIMIT", "CSV exceeds the configured row limit", 413)
                 if not row or all(not value.strip() for value in row):
@@ -183,9 +186,14 @@ def normalize(
                 cells += len(row)
                 if len(row) > settings.max_columns or cells > settings.max_cells:
                     reject("CELL_LIMIT", "CSV exceeds the configured cell limit", 413)
-                for column, value in enumerate(row, 1):
-                    if value:
-                        add(value, sheet="CSV", cell=f"{get_column_letter(column)}{row_number}")
+                # A CSV has logical records, not named workbook sheets. Keep each original
+                # record intact so quotes and extraction evidence survive normalization.
+                add(
+                    row_text,
+                    sheet="CSV",
+                    cell=f"A{row_number}:{get_column_letter(len(row))}{row_number}",
+                    unit_id=f"row-{row_number}",
+                )
         except csv.Error:
             reject("CSV_MALFORMED", "CSV quoting or field size is invalid")
     elif media_type == MEDIA_TYPES[".xlsx"]:
