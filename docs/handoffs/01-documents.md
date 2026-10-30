@@ -6,6 +6,13 @@ The pending-review text in the frozen bootstrap documents is stale; the tag exis
 and matches the SHA supplied by the team. No frozen contracts or shared runtime
 files were changed.
 
+Implementation history: `9a9bfa5be372fbac5a7408b0648f32ff75cb8460` contains the
+original module. Code and CSV compatibility were verified at
+`a5f416cbb5eccc2945a57d0dc5e39599ed678764`; the following handoff commit changes
+documentation only. The published PR head is the exact SHA to use for member 5's
+review. Source branch: `xandreiev-dev/future-makers-egrant:codex/documents`;
+target: `andr1chkol/future-makers-egrant:main`.
+
 ## Delivery status
 
 The owned backend and upload feature are implemented and tested. Shared-app
@@ -14,10 +21,12 @@ The unchanged foundation currently serves document shells and an unavailable
 worker handler. Browser tests replace those registrations in a test assembly of
 the existing application; they do not prove that integration has been merged.
 
-GitHub refused the authenticated push dry run with HTTP 403: the current account
-has no repository write permission. No remote branch, PR, review request, merge,
-or deployment was created. An independent agent reviewed the implementation and
-its fixes. Member 5's fresh-chat peer review is still required.
+GitHub refused a direct upstream push with HTTP 403: the current account has
+read access but no upstream write permission. A contribution fork under
+`xandreiev-dev/future-makers-egrant` is used for publication instead. No force-push,
+automatic merge or deployment is authorized. An independent agent reviewed the
+original implementation; the author reviewed the CSV follow-up and reran the
+checks below. Member 5's fresh-chat peer review is still required.
 
 ## Public interfaces and registrations
 
@@ -33,8 +42,10 @@ reconcile_interrupted(session: Session) -> None
 `get_normalized` never commits. Unknown IDs raise `NotFoundError`; uploaded,
 processing and failed documents raise `ConflictError`. Ready source units are
 immutable. Retrying a ready document returns 409; a new upload is required to
-produce different source data. Source IDs are UUIDv5 values derived from the
-document ID and page or sheet/cell location. Units remain ordered across reads.
+produce different source data. PDF/image and XLSX source IDs are UUIDv5 values
+derived from the document ID and page or sheet/cell location. CSV uses logical
+record IDs `row-1`, `row-2`, etc., scoped by `documentId`. Units remain ordered
+across reads.
 
 Member 5 must make these shared changes in a coordinated integration PR:
 
@@ -104,11 +115,27 @@ Text PDFs are read through PDFium, one unit per page. Pages without usable text
 are rendered for OCR. Images use page 1. XLSX uses cached formula results and
 never executes formulas, macros or links. Missing cached results generate
 `FORMULA_VALUE_UNAVAILABLE`. Each populated cell retains its sheet name and A1
-coordinate. CSV uses sheet `CSV`, logical record numbers and A1 coordinates;
-blank records consume a row number. Supported encodings are UTF-8, optional UTF-8
+coordinate. CSV uses sheet `CSV`, one source per logical record, and A1 ranges
+such as `A2:I2`; blank records consume a row number. Original quoting and embedded
+newlines remain in the record text. Supported encodings are UTF-8, optional UTF-8
 BOM and BOM-marked UTF-16. Comma, semicolon and tab delimiters are detected.
 Malformed quoting, inconsistent widths, binary controls and unsupported encoding
 fail explicitly. Empty sources never become a successful normalized document.
+
+The actual `synthetic-invoice.csv` produces `row-1` through `row-4` with the same
+text, page values and cell ranges as `contracts/examples/normalized-document.json`.
+The CSV sheet name remains `CSV`: the example's `invoice` is an illustrative alias,
+not a worksheet stored in the CSV. Member 2's fixture fingerprint uses unit IDs
+and text, so it matches without special-casing the filename, content hash or mode.
+The source resolver uses the actual normalized metadata. A cross-module smoke
+check against extraction head `f21eb8434a63dd65a9d509c76de9031fad67faaa` passed:
+4 source units, 6 scalar fields and 2 table rows, with correct source IDs, quotes
+and cell ranges. This uses the explicit extraction fixture provider; document
+parsing itself reads the uploaded bytes in both fixture and live modes.
+
+Already-ready CSV sources from the original implementation remain immutable.
+They are not migrated or rewritten, including on repeated jobs. Re-upload a CSV
+to use the row policy; a consumed document is never silently invalidated.
 
 Parsing runs in a killable subprocess, outside database transactions. Linux also
 receives a 768 MiB address-space limit; that memory limit is unavailable on Windows.
@@ -129,7 +156,8 @@ to `/documents?document=<UUID>&page=2` or
 filters the exact unit. PDF page selection and spreadsheet filters are visible;
 original images/PDFs and normalized cell/text sources are previewed privately.
 The UI creates one review link per returned extraction ID and restores existing
-links from the extraction list. Extraction and profile lists currently display
+links from the extraction list. Cell navigation also finds CSV rows containing
+the selected cell, including columns beyond Z. Extraction and profile lists currently display
 the first 200 records and disclose truncation. Document pagination uses 50 records.
 
 ## Configuration and provider verification
@@ -214,19 +242,19 @@ loopback; production database credentials are outside this handoff.
 | Actual check | Result |
 | --- | --- |
 | Full `python -m pytest -q` on PostgreSQL 16.15 | 96 passed, 1 failed, exit 1 |
-| `python -m pytest tests/documents -q` on PostgreSQL 16.15 | 65 passed, exit 0, 74.47 seconds |
+| `python -m pytest tests/documents -q` on PostgreSQL 16.15, CSV follow-up | 71 passed, exit 0, 68.62 seconds |
 | Shared failure | `test_private_storage_is_immutable_and_rejects_traversal`: missing Windows `os.O_NOFOLLOW` |
 | `ruff check backend scripts tests` | Passed, exit 0 |
 | `ruff format --check backend scripts tests` | Passed, exit 0 |
 | `uv lock --check` | Passed, exit 0 |
 | `python scripts/scan_secrets.py` | Passed, exit 0 |
 | Contract export, client generation, frozen-file diff | Passed; no schema/client drift |
-| `npm test --prefix frontend` | 7 tests passed, exit 0 |
+| `npm test --prefix frontend` | 8 tests passed, exit 0 |
 | `npm run build --prefix frontend` | Passed, exit 0 |
 | Prettier check of owned feature | Passed, exit 0 |
 | Shared default Prettier check on CRLF checkout | Failed for existing shared line endings |
 | Shared Prettier with `--end-of-line auto` | Passed, exit 0 |
-| Document Playwright suite on PostgreSQL 16.15 | 2 passed, exit 0, 24.2 seconds |
+| Document Playwright suite on PostgreSQL 16.15, CSV follow-up | 2 passed, exit 0, 20.7 seconds |
 
 Meaningful coverage includes real PDF text, fake OCR page ordering, images,
 spreadsheet coordinates/cached formulas, CSV encodings/blank rows, corruption,
@@ -234,6 +262,29 @@ spoofing, traversal filenames, limits, macros/XML entities, false worksheet
 dimensions, duplicates, concurrent retries, bounded retries, stale workers,
 restart recovery, terminal crash reconciliation, access checks, exact OpenAPI
 operations, log correlation and realistic synthetic secret/PII redaction.
+
+The full-suite 96/1 result predates the CSV follow-up. The follow-up reran all
+document tests, frontend tests/build, browser scenarios and lint/format checks;
+the known shared Windows storage defect remains outside this branch's ownership.
+
+Cross-module smoke command (after extraction is assembled):
+
+```sh
+PYTHONPATH=backend .venv/bin/python tests/documents/check_extraction_compatibility.py
+```
+
+For the check actually run on this documents-only branch, extraction and validation
+sources were archived unchanged from `origin/codex/extraction` at `f21eb843...`
+under `.private/extraction-compatibility-source`, then this command exited 0:
+
+```sh
+PYTHONPATH=backend .venv/bin/python tests/documents/check_extraction_compatibility.py \
+  --extraction-app-path .private/extraction-compatibility-source/backend/app
+```
+
+The script prints only status, provider mode and counts. It compares actual parsed
+CSV input with the frozen extraction values and validates provenance; it never
+prints the document or provider response.
 
 `make` and Docker are unavailable on this host, so checks were run through their
 underlying commands. The shared foundation E2E launcher was not executed: it uses
@@ -294,11 +345,14 @@ After member 5 completes registration and dependencies:
 6. Select a configured profile and ready documents. Launch extraction and verify
    a separate review link for each document. No confirmation/export/apply happens here.
 
-With write access and GitHub CLI available, publish from this branch:
+With write access to the contribution fork and GitHub CLI available, publish from
+this branch. Keep `origin` pointing at the team repository:
 
 ```sh
-git push -u origin codex/documents
-gh pr create --base main --head codex/documents --draft \
+git remote add contribution https://github.com/xandreiev-dev/future-makers-egrant.git
+git push -u contribution codex/documents
+gh pr create --repo andr1chkol/future-makers-egrant --base main \
+  --head xandreiev-dev:codex/documents --draft \
   --title "Implement private document intake and source normalization" \
   --body-file docs/handoffs/01-documents.md
 git rev-parse HEAD
