@@ -238,7 +238,11 @@ def test_another_profile_maps_tags_and_preserves_null_false_decimal_and_human_ro
     assert payload.tables[0].rows[0].row_id == review.tables[0].rows[0].row_id
 
 
-def test_unavailable_owner_and_egrant_fail_honestly(database):
+def test_unavailable_owner_and_egrant_fail_honestly(database, monkeypatch):
+    def owner_unavailable(*args):
+        raise UnavailableError()
+
+    monkeypatch.setattr(dependencies, "get_confirmed_review", owner_unavailable)
     request = c.CreateSubmission(
         review_id=uuid4(),
         review_revision=1,

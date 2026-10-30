@@ -3,6 +3,7 @@ from app.integrations import models as submission_models  # noqa: F401
 from app.platform import models  # noqa: F401
 from app.platform.database import Base
 from app.platform.settings import get_settings
+from app.profiles import models as profile_models  # noqa: F401
 from sqlalchemy import create_engine
 
 engine = create_engine(get_settings().database_url.get_secret_value(), hide_parameters=True)

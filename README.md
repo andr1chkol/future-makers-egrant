@@ -3,11 +3,12 @@
 Document-to-form extraction with mandatory human review.
 Repository: https://github.com/andr1chkol/future-makers-egrant.
 
-On `codex/integration`, member 5 implements confirmed submission persistence,
-idempotent JSON export, processing history and submission status. New exports
-require the domain owners' public review/extraction/profile services; missing
-services return `503 FEATURE_UNAVAILABLE`. Existing exports remain downloadable
-from their stored immutable payload. The UI never inserts example history.
+On `codex/integration`, the reviewed profiles module supports illustrative form
+import, mapping configuration and immutable profile versions. Confirmed submission
+persistence, idempotent JSON export, history/status pages and recovery logging are
+also implemented. Missing document, extraction and review registrations return
+`503 FEATURE_UNAVAILABLE`; they are not replaced with runtime example records.
+Existing exports remain downloadable from their stored immutable payload.
 
 The published `bootstrap-v1` is commit
 `88d1b959c524cfd559d01ee8ff6ac3f183f7c9e8`. It remains unchanged. Domain
@@ -91,12 +92,23 @@ export INTEGRATION_E2E_DATABASE_URL=postgresql+psycopg://egrant:local-test-only@
 make e2e-integration
 ```
 
-This suite uses explicit test-only neighboring public-interface doubles while
+Profiles have two additional browser suites (two UI-adapter scenarios and one
+real UI/API/PostgreSQL workflow with two distinct forms). Use a separate empty
+test database; the guarded test server applies the production migrations itself:
+
+```sh
+docker exec egrant-bootstrap-test createdb -U egrant egrant_test_profiles_browser
+TEST_DATABASE_URL=postgresql+psycopg://egrant:local-test-only@localhost:55432/egrant_test_profiles_browser make e2e-profiles
+```
+
+The submission suite uses explicit test-only neighboring public-interface doubles while
 exercising the real submission routes, PostgreSQL persistence and JSON download.
 History UI tests mock the absent extraction list. It is not a complete
 upload/extract/review workflow or a live-provider check. Keep test ports free.
-The complete flow and assembled domain-route coverage remain pending owners'
-reviewed implementations. CI runs both browser suites; screenshots go to docs/release.
+The complete flow and assembled domain-route coverage remain pending review,
+extraction and documents implementations. CI runs foundation, submission and both
+profile browser suites. Artifacts include docs/release screenshots and frontend
+test-results.
 
 ## Contracts and module ownership
 
@@ -112,7 +124,9 @@ Do not duplicate models in features. The examples include a missing purchase
 order, warnings, table rows, exact sources and a separate human correction.
 `python scripts/create_examples.py` rebuilds them deterministically.
 
-Platform migration: `0001_platform`; integration migration: `0501_submissions`. Reserve `010*` documents, `020*` extraction,
+Platform migration: `0001_platform`; integration migration: `0501_submissions`.
+`0502_profiles_assembly` merges it with the unchanged owned `0301_profiles`.
+Reserve `010*` documents, `020*` extraction,
 `030*` profiles, `040*` reviews and `050*` integrations. Module migrations branch
 from `0001_platform`; member 5 reconciles heads with a merge migration. Request
 shared dependencies, registrations or contracts in each module handoff and PR.

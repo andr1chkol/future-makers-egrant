@@ -1,5 +1,5 @@
 UV ?= uv
-.PHONY: dev install check test e2e generate migrate e2e-integration
+.PHONY: dev install check test e2e generate migrate e2e-integration e2e-profiles
 install:
 	$(UV) sync --locked
 	cd frontend && npm ci
@@ -26,3 +26,7 @@ e2e:
 
 e2e-integration:
 	cd frontend && npx playwright test --config playwright.integration.config.ts
+
+e2e-profiles:
+	cd frontend && npx playwright test --config src/features/profiles/playwright.config.ts
+	cd frontend && npx playwright test --config src/features/profiles/playwright.integration.config.ts

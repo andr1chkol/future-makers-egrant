@@ -127,8 +127,9 @@ and explicit human acknowledgement. No external adapter is available in bootstra
 
 ## Migration and shared-file requests
 
-0001_platform is the foundation revision; 0501_submissions branches from it
-and owns the submissions table. Reserve 010* documents, 020*
+0001_platform is the foundation revision. 0501_submissions owns submissions;
+0301_profiles owns imported forms/profile versions. Their histories converge at
+the new no-op merge revision 0502_profiles_assembly. Reserve 010* documents, 020*
 extraction, 030* profiles, 040* reviews, 050* integrations. Each module's first
 migration points to 0001_platform. Independent branches need a member-5 merge
 revision before assembled release; never edit published revisions.
@@ -184,8 +185,50 @@ No append/replace HTTP adapter, remote timeout handling or receipt reconciliatio
 is claimed. Those require documented interfaces and explicit write authorization.
 The defensive apply handler/recovery tests use seeded operations only.
 
-The logger carries requestId/jobId/attempt through handlers and permits numeric
-revision for review logs. The public module routers and migration registrations
-for members 1–4 remain pending their independently reviewed PRs. PR #3 has review
-code and integration requests but has not been merged here. Register its owned
-migration location and reconcile heads after review; do not rewrite 0401_reviews.
+The logger carries requestId/jobId/attempt through handlers and recovery; it
+permits numeric revision/version and UUID profileId/formId. PR #5 fixes recovery
+correlation and is merged into integration. The seven profile/form operations
+from reviewed e845099 replace their shells. Profiles models and migration location
+are registered; production profile routes are used by both API/browser tests.
+Review PR #3 and Draft extraction PR #6 lack independent verdicts and remain
+unregistered; documents is unpublished. Do not rewrite their owned migrations.
+
+## Extraction recovery coordination (pending member 2 and review)
+
+Member 2 requested extraction router/handler registration, migration discovery,
+aiConfigured from OpenAIProvider.from_settings and terminal-job recovery. The
+shared changes land with the independently reviewed extraction head, not by
+adding an unreviewed module to main. No new HTTP DTO or dependency is needed.
+
+Proposed public synchronous owner interface:
+
+```python
+# app.extraction.service
+recover_terminal_extractions(session: Session) -> None
+```
+
+This function is not implemented/registered on this integration head. Member 2
+owns the domain transition; member 5 will invoke it with a fresh Session in the
+worker polling loop alongside submission recovery. It owns its short transaction,
+locks a bounded batch of queued/running extraction rows with SKIP LOCKED and
+selects a deterministic failed extraction.process job per resource. It must skip
+resources with any queued/running job, including a newer manual retry. Set the
+extraction to failed with a safe error and invalidate run_token, preserving human
+review/results. Emit extraction.failed after commit with original requestId,
+jobId, extractionId, documentId and job attempt. Do not reset the attempt budget
+or automatically issue more paid calls. A late worker must fail token fencing.
+
+Regression cases required from member 2: crash on the final lease; handler leaves
+queued on the queue's final failed attempt; active newer retry; completed ready
+run; concurrent sweep/retry; late worker; repeat recovery; safe correlated logs.
+The platform turns expired exhausted leases into failed jobs on claim; recovery
+may therefore happen on the next polling cycle. Provider HTTP remains outside DB
+transactions. Current lease is 60 s and provider socket timeout is 40 s. The
+socket timeout is not proof of an end-to-end deadline; provider/read/parse behavior
+under delays must be checked before claiming the work always fits the lease.
+No lease renewal or live-provider timeout verification is added by this change.
+
+After review, register process_extraction explicitly and compute aiConfigured
+from the actual configured OpenAI adapter. Keep ocrConfigured/egrantConfigured
+false until their respective implemented adapters exist. Preserve explicit
+fixture mode; presence of a key alone must not bypass a missing module.

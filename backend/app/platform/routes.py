@@ -9,16 +9,11 @@ from fastapi.responses import Response
 from app.platform.contracts import (
     ConfirmReview,
     CreateExtractions,
-    CreateForm,
-    CreateProfileVersion,
     Document,
     Extraction,
     ExtractionBatch,
-    FormDefinition,
     NormalizedDocument,
     Page,
-    Profile,
-    ProfileDefinition,
     Review,
     SaveReview,
     Success,
@@ -68,41 +63,6 @@ def get_normalized(id: UUID):
 
 @router.post("/documents/{id}/retries", status_code=202, response_model=Success[Document])
 def retry_document(id: UUID):
-    raise UnavailableError()
-
-
-@router.post("/forms", status_code=201, response_model=Success[FormDefinition])
-def create_form(request: CreateForm):
-    raise UnavailableError()
-
-
-@router.get("/forms", response_model=Page[FormDefinition])
-def list_forms(limit: Limit = 50, offset: Offset = 0):
-    raise UnavailableError()
-
-
-@router.get("/forms/{id}", response_model=Success[FormDefinition])
-def get_form(id: UUID):
-    raise UnavailableError()
-
-
-@router.post("/profiles", status_code=201, response_model=Success[Profile])
-def create_profile(request: ProfileDefinition):
-    raise UnavailableError()
-
-
-@router.get("/profiles", response_model=Page[Profile])
-def list_profiles(limit: Limit = 50, offset: Offset = 0):
-    raise UnavailableError()
-
-
-@router.get("/profiles/{id}", response_model=Success[Profile])
-def get_profile(id: UUID, version: Annotated[int | None, Query(ge=1)] = None):
-    raise UnavailableError()
-
-
-@router.post("/profiles/{id}/versions", status_code=201, response_model=Success[Profile])
-def create_version(id: UUID, request: CreateProfileVersion):
     raise UnavailableError()
 
 

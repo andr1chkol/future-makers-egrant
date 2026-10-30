@@ -7,6 +7,9 @@ export default defineConfig({
     {
       command:
         "DEV_AUTH_BYPASS=true APP_MODE=fixture COOKIE_SECURE=false PUBLIC_ORIGIN=http://localhost:5174 ../.venv/bin/python -m uvicorn app.main:app --port 8011 --no-access-log --app-dir ../backend",
+      env: process.env.TEST_DATABASE_URL
+        ? { DATABASE_URL: process.env.TEST_DATABASE_URL }
+        : {},
       port: 8011,
       reuseExistingServer: false,
     },

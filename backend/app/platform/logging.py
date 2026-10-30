@@ -38,8 +38,16 @@ EVENTS = {
     "request.completed",
     "request.failed",
 }
-ID_KEYS = {"requestId", "jobId", "documentId", "extractionId", "submissionId"}
-NUMBER_KEYS = {"durationMs", "attempt", "revision"}
+ID_KEYS = {
+    "requestId",
+    "jobId",
+    "documentId",
+    "extractionId",
+    "submissionId",
+    "profileId",
+    "formId",
+}
+NUMBER_KEYS = {"durationMs", "attempt", "revision", "version"}
 
 
 def safe_id(value):
