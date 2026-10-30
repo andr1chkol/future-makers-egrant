@@ -1,17 +1,16 @@
-# Bootstrap interface freeze candidate
+# Shared platform and integration interfaces
 
 BASE_BRANCH=main
 SETUP_BRANCH=codex/bootstrap
 SOURCE_SHA=787bf7b
 BASELINE_TAG=bootstrap-v1
-BASELINE_SHA=PENDING_INDEPENDENT_REVIEW
+BASELINE_SHA=88d1b959c524cfd559d01ee8ff6ac3f183f7c9e8
 
-The candidate preserves the existing main history. origin/master contains a
-separate README commit; it has no application stack to reconcile. No competing
-implementation or CI existed at inspection. Main is the remote default and PR
-target. No bootstrap tag existed. Do not start module work until member 4 has
-reviewed the exact candidate SHA and bootstrap-v1 is published. Resolve the
-immutable tag with `git rev-parse bootstrap-v1^{commit}`; never move it.
+The published bootstrap-v1 preserves main history. Its immutable SHA is recorded
+above; verify it with `git rev-parse bootstrap-v1^{commit}`. Member 4's independent
+bootstrap report is published in PR #2 for head 70370b3; its tree matches the
+baseline merge. Never move the tag. Integration work uses codex/integration.
+Module implementations land through independently reviewed PRs to BASE_BRANCH.
 
 ## Runtime and DTOs
 
@@ -28,8 +27,9 @@ TypeScript. Frontend uses `api` from `frontend/src/shared/api.ts`.
 
 All functions below are synchronous. UUID is `uuid.UUID`. Session is
 `sqlalchemy.orm.Session`. DTO names are from `app.platform.contracts`.
-Domain modules and these functions are intentionally not implemented by bootstrap.
-Owners implement exactly these import paths before requesting assembly.
+Domain owners implement these import paths before requesting assembly. The
+integrations service is implemented on codex/integration; its upstream reads
+return unavailable until the owners' services are present.
 
 ```python
 # app.documents.service
@@ -79,9 +79,13 @@ no lease renewal. At-least-once execution still requires idempotent domain write
 A late worker cannot finalize the job, but domain writes need their own constraints.
 
 `app.worker.build_registry` explicitly reserves document.process,
-extraction.process, submission.apply. Current handlers raise HandlerUnavailableError (app.platform.jobs) and fail HANDLER_UNAVAILABLE;
-they never pretend work succeeded. Owners request replacement imports/registration
-in their handoff. Register exactly once; duplicate registrations raise ValueError.
+extraction.process, submission.apply. The document handler is app.documents.service.process_document. Extraction handlers currently raise HandlerUnavailableError
+(app.platform.jobs) and fail HANDLER_UNAVAILABLE. submission.apply uses
+app.integrations.service.apply_submission, which makes no external calls while
+the eGrant adapter is unavailable. It preserves interrupted applying operations
+as unknown and fails undispatched operations. The worker recovers terminal
+apply leases before polling again. The worker invokes app.documents.service.reconcile_interrupted with a fresh Session on every polling cycle. Owners request extraction replacement
+imports/registration in their handoff. Register exactly once; duplicate registrations raise ValueError.
 A submission timeout or exhausted apply lease requires owner reconciliation to
 unknown before any new write. Never automatically retry a possibly applied effect.
 
@@ -123,7 +127,9 @@ and explicit human acknowledgement. No external adapter is available in bootstra
 
 ## Migration and shared-file requests
 
-0001_platform is the only foundation revision. Reserve 010* documents, 020*
+0001_platform is the foundation revision. 0501_submissions owns submissions;
+0301_profiles owns imported forms/profile versions. Their histories converge at
+the new no-op merge revision 0502_profiles_assembly. Reserve 010* documents, 020*
 extraction, 030* profiles, 040* reviews, 050* integrations. Each module's first
 migration points to 0001_platform. Independent branches need a member-5 merge
 revision before assembled release; never edit published revisions.
@@ -150,3 +156,105 @@ The UI reads mode from session and keeps the fixture banner visible on every
 route. Linked fixture examples are reference data only; they do not make domain
 routes functional. Full domain-route coverage and the complete fixture workflow
 remain pending until owners' implementations are assembled.
+
+
+## Submission persistence and assembly status
+
+The protected integrations router replaces exactly the three submission shells.
+Wire DTOs, examples, OpenAPI and generated client are unchanged. New operations
+read the exact confirmed review revision, extraction profile identity/version,
+versioned profile and form via the public interfaces above. Mapping validation
+checks exact keys, unique destination tags, row UUIDs, field types, required
+values, options and current warning acknowledgements before persisting payload.
+The immutable profile-version contract remains a prerequisite; no private domain
+table is read. Existing idempotent operations use their stored payload even if
+an upstream owner becomes unavailable.
+
+A PostgreSQL unique constraint protects the opaque idempotency key. Canonical
+request hashing covers all CreateSubmission fields, including overwrite intent
+and target context. INSERT ON CONFLICT DO NOTHING plus a fresh READ COMMITTED
+read resolves concurrent inserts; changed intent returns 409. Failed validation
+rolls back the operation. No external side effect occurs in the transaction.
+GET export locks the operation, allows only prepared/exported export mode and
+returns the stored envelope-free payload. Exported means the download was served,
+not that the browser saved it or eGrant accepted it.
+
+EGRANT capability remains false in both modes. POST mode=egrant returns 503 and
+does not enqueue a job, regardless of credentials or acknowledgeOverwrite.
+No append/replace HTTP adapter, remote timeout handling or receipt reconciliation
+is claimed. Those require documented interfaces and explicit write authorization.
+The defensive apply handler/recovery tests use seeded operations only.
+
+The logger carries requestId/jobId/attempt through handlers and recovery; it
+permits numeric revision/version and UUID profileId/formId. PR #5 fixes recovery
+correlation and is merged into integration. The seven profile/form operations
+from reviewed e845099 replace their shells. Profiles models and migration location
+are registered; production profile routes are used by both API/browser tests.
+Review PR #3 and Draft extraction PR #6 lack independent verdicts and remain
+unregistered; documents is unpublished. Do not rewrite their owned migrations.
+
+## Extraction recovery coordination (pending member 2 and review)
+
+Member 2 requested extraction router/handler registration, migration discovery,
+aiConfigured from OpenAIProvider.from_settings and terminal-job recovery. The
+shared changes land with the independently reviewed extraction head, not by
+adding an unreviewed module to main. No new HTTP DTO or dependency is needed.
+
+Proposed public synchronous owner interface:
+
+```python
+# app.extraction.service
+recover_terminal_extractions(session: Session) -> None
+```
+
+This function is not implemented/registered on this integration head. Member 2
+owns the domain transition; member 5 will invoke it with a fresh Session in the
+worker polling loop alongside submission recovery. It owns its short transaction,
+locks a bounded batch of queued/running extraction rows with SKIP LOCKED and
+selects a deterministic failed extraction.process job per resource. It must skip
+resources with any queued/running job, including a newer manual retry. Set the
+extraction to failed with a safe error and invalidate run_token, preserving human
+review/results. Emit extraction.failed after commit with original requestId,
+jobId, extractionId, documentId and job attempt. Do not reset the attempt budget
+or automatically issue more paid calls. A late worker must fail token fencing.
+
+Regression cases required from member 2: crash on the final lease; handler leaves
+queued on the queue's final failed attempt; active newer retry; completed ready
+run; concurrent sweep/retry; late worker; repeat recovery; safe correlated logs.
+The platform turns expired exhausted leases into failed jobs on claim; recovery
+may therefore happen on the next polling cycle. Provider HTTP remains outside DB
+transactions. Current lease is 60 s and provider socket timeout is 40 s. The
+socket timeout is not proof of an end-to-end deadline; provider/read/parse behavior
+under delays must be checked before claiming the work always fits the lease.
+No lease renewal or live-provider timeout verification is added by this change.
+
+After review, register process_extraction explicitly and compute aiConfigured
+from the actual configured OpenAI adapter. Keep ocrConfigured/egrantConfigured
+false until their respective implemented adapters exist. Preserve explicit
+fixture mode; presence of a key alone must not bypass a missing module.
+
+## Documents assembly
+
+The six document shells are replaced by app.documents.routes.router with the
+shared access dependency and unchanged binary response metadata. Normalized reads
+use app.documents.service.get_normalized without committing. Recovery uses
+reconcile_interrupted(session: Session) -> None, a bounded batch of 50, and logs
+the original job correlation after commit. The production registry contains one
+document.process handler. Alembic imports document models and discovers their
+owned migration directory. 0503_documents_assembly joins the published
+0502_profiles_assembly and original 0101_documents; published migrations are unchanged.
+
+Intake holds a negative bigint advisory lock derived from each generated document
+UUID across private storage and database commit. app.documents.cleanup uses the
+same lock before checking row absence and deleting an old orphan. Positive hash
+locks remain reserved for duplicate serialization. See the documents assembly
+handoff for supported runtime and multipart boundary limits.
+
+The existing extraction fixture expects row-based normalized units and fingerprints
+unit IDs. Actual CSV intake emits UUIDv5 cell units tied to each new document.
+An isolated public-interface probe against extraction f21eb84 reaches durable
+FIXTURE_NOT_AVAILABLE. Member 2 must supply fixture recognition/rebinding for actual
+cell sources, retaining genuine source IDs/quotes and explicit fixture-only mode.
+Do not alter the synthetic CSV bytes/hash or substitute the old normalized example
+in the production documents service. Full successful extraction assembly remains
+blocked pending that owner change and exact-head independent review.

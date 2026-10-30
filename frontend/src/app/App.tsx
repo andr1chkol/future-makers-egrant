@@ -3,9 +3,11 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { NavLink, Navigate, Route, Routes } from "react-router-dom";
 import { FileText, SlidersHorizontal, ShieldCheck } from "lucide-react";
 import { api } from "../shared/api";
-import { Button, FeatureUnavailable, Notice } from "../shared/ui";
+import { Button, Notice } from "../shared/ui";
 import { UploadPage } from "../features/upload";
 import { ProfilesPage, ProfileEditorPage } from "../features/profiles";
+import { HistoryPage } from "./HistoryPage";
+import { SubmissionPage } from "./SubmissionPage";
 import { ReviewPage } from "../features/review";
 
 export function App() {
@@ -124,6 +126,9 @@ export function App() {
             <NavLink to="/profiles">
               <SlidersHorizontal size={19} aria-hidden="true" /> Profily
             </NavLink>
+            <NavLink to="/history">
+              <FileText size={19} aria-hidden="true" /> História
+            </NavLink>
             <div className="provider-status">
               <p className="eyebrow">Integrácie</p>
               {capabilities.isPending ? (
@@ -159,10 +164,8 @@ export function App() {
               <Route path="/profiles/new" element={<ProfileEditorPage />} />
               <Route path="/profiles/:id" element={<ProfileEditorPage />} />
               <Route path="/review/:extractionId" element={<ReviewPage />} />
-              <Route
-                path="/submissions/:id"
-                element={<FeatureUnavailable title="Export a odoslanie" />}
-              />
+              <Route path="/history" element={<HistoryPage />} />
+              <Route path="/submissions/:id" element={<SubmissionPage />} />
               <Route path="*" element={<Navigate to="/documents" replace />} />
             </Routes>
           </main>

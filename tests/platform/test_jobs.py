@@ -1,16 +1,35 @@
 from datetime import timedelta
 from uuid import uuid4
 
+from alembic.config import Config
+from alembic.script import ScriptDirectory
 from app.platform.jobs import JobPayload, JobRegistry, claim, enqueue, run_once
 from app.platform.logging import request_id
 from app.platform.models import Job
 from app.worker import build_registry
-from sqlalchemy import func, select, text, update
+from sqlalchemy import func, inspect, select, text, update
 
 
 def test_migration_and_transactional_enqueue(database):
     with database() as session:
-        assert session.scalar(text("SELECT version_num FROM alembic_version")) == "0001_platform"
+        migrations = ScriptDirectory.from_config(Config("backend/alembic.ini"))
+        assert set(session.scalars(text("SELECT version_num FROM alembic_version"))) == set(
+            migrations.get_heads()
+        )
+        assert len(migrations.get_heads()) == 1
+        assert {"0001_platform", "0101_documents", "0301_profiles", "0501_submissions"} <= {
+            revision.revision for revision in migrations.walk_revisions()
+        }
+        assert {
+            "documents",
+            "document_source_units",
+            "platform_jobs",
+            "platform_sessions",
+            "submissions",
+            "profile_forms",
+            "profile_heads",
+            "profile_versions",
+        } <= set(inspect(session.bind).get_table_names())
         assert session.scalar(text("SHOW server_version")).startswith("16.")
         enqueue(session, "document.process", JobPayload(resource_id=uuid4()))
         session.rollback()
@@ -69,7 +88,7 @@ def test_retry_is_bounded_and_request_correlation_reaches_handler(database):
     assert observed == [(resource_id, correlation)] * 3
 
 
-def test_missing_handlers_fail_and_apply_is_never_blindly_retried(database):
+def test_orphan_apply_fails_and_is_never_blindly_retried(database):
     registry = build_registry()
     assert set(registry.handlers) == {"document.process", "extraction.process", "submission.apply"}
     with database.begin() as session:
@@ -79,7 +98,7 @@ def test_missing_handlers_fail_and_apply_is_never_blindly_retried(database):
         job = session.get(Job, job_id)
         assert job.status == "failed"
         assert job.max_attempts == 1
-        assert job.error_code == "HANDLER_UNAVAILABLE"
+        assert job.error_code == "JOB_FAILED"
     assert not run_once(database, registry)
 
 

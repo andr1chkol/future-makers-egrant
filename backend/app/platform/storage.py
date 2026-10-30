@@ -7,6 +7,12 @@ from app.platform.errors import DomainError, NotFoundError
 
 class PrivateStorage:
     def __init__(self, root: Path):
+        if os.name != "posix" or not hasattr(os, "O_NOFOLLOW"):
+            raise DomainError(
+                "STORAGE_UNAVAILABLE",
+                503,
+                "Private storage requires a POSIX runtime; use the Linux containers",
+            )
         self.root = root.resolve()
         self.root.mkdir(parents=True, exist_ok=True, mode=0o700)
 

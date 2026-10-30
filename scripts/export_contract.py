@@ -8,6 +8,8 @@ import yaml
 from app.main import create_app
 
 root = Path(__file__).resolve().parents[1]
-(root / "contracts/api.yaml").write_text(
-    yaml.safe_dump(create_app().openapi(), sort_keys=False, allow_unicode=True)
-)
+schema = create_app().openapi()
+contract = root / "contracts/api.yaml"
+# Router registration can change mapping order without changing the wire contract.
+if not contract.exists() or yaml.safe_load(contract.read_text()) != schema:
+    contract.write_text(yaml.safe_dump(schema, sort_keys=False, allow_unicode=True))
