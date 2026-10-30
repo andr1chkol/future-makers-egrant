@@ -35,11 +35,17 @@ checks below. Member 5's fresh-chat peer review is still required.
 ```python
 from app.documents.routes import router
 from app.documents.service import get_normalized, process_document, reconcile_interrupted
+from app.documents.models import StoredDocument, StoredSourceUnit
 
 get_normalized(session: Session, document_id: UUID) -> NormalizedDocument
 process_document(session: Session, document_id: UUID) -> None
 reconcile_interrupted(session: Session) -> None
 ```
+
+`StoredDocument` maps to `documents`; `StoredSourceUnit` maps to
+`document_source_units`. Both use the shared SQLAlchemy `Base`. Import them for
+Alembic metadata discovery; extraction and review consume public DTOs through
+the service interface rather than querying these private tables.
 
 `get_normalized` never commits. Unknown IDs raise `NotFoundError`; uploaded,
 processing and failed documents raise `ConflictError`. Ready source units are
