@@ -105,7 +105,7 @@ response schemas are tested against the frozen `contracts/api.yaml`.
    change, e.g. asserting that `0001_platform` is an ancestor, or the merge revision.
 4. **Capabilities:** `aiConfigured` is hardcoded to `false` in `app/main.py`.
    It can be `OpenAIProvider.from_settings(get_settings()) is not None` once the
-   router is mounted. The adapter exists, but no live call has been verified (see Limits).
+   router is mounted. Live calls were verified with `gpt-4.1-mini` (see Evaluation).
 5. **Logging vocabulary:** there is no `extraction.retry_scheduled` event, so
    retries log `job.retry_scheduled` with `extractionId`, `attempt` and the provider
    code (`AI_RATE_LIMITED`, `AI_TIMEOUT`, ...). The platform logs its own generic
@@ -157,8 +157,9 @@ result is stored and are returned unchanged on every read.
 - `live`: `OpenAIProvider` calls `POST https://api.openai.com/v1/responses`
   with `text.format = json_schema, strict: true` and `store: false`. The
   instructions treat document content as untrusted data; the document is sent
-  only in the user input. **Verified only with a faked HTTP layer.** No live call
-  has been made: no credentials were provided.
+  only in the user input. Unit tests use a faked HTTP layer. **Live calls were
+  verified on 2026-10-30 with `gpt-4.1-mini`** on synthetic documents only (see
+  Evaluation). The team has not chosen a production model; `OPENAI_MODEL` decides.
 
 ## Logs
 
@@ -198,7 +199,38 @@ contract type (1), a total taken from an injected instruction (1, caught by the
 total check), an invented due date (flagged), and a dropped bank transaction
 (3 cells, caught by the balance check). Swapped parties are not detectable in code
 when both names are quoted correctly; the evaluator reports them as incorrect.
-No live evaluation has been run, so there is no model accuracy figure.
+
+### Live runs (2026-10-30, `gpt-4.1-mini`, synthetic documents only)
+
+The first live run exposed three problems in this module, not in the model:
+
+- Dates printed with a time (`29.10.2026 18:05`) were unreadable. The date parser now
+  ignores a trailing time of day.
+- Row amounts lost their currency: the model returned `null` when the currency was
+  stated in a column header or once for the document, as the instructions then
+  required. The instructions now accept a currency stated for the column, row or
+  whole document, and still require `null` when several currencies leave it open.
+- Values carried neighbouring text (a party name with its address, an item
+  description with its price). The instructions now ask for the value only.
+
+| Run | Split | Cases | Expected values | Correct | Missing | Incorrect | Invented | Flagged |
+|---|---|---|---|---|---|---|---|---|
+| before the fixes | tuning | 2 | 32 | 28 | 4 | 0 | 0 | 0 |
+| before the fixes | held-out | 4 | 51 | 38 | 9 | 4 | 0 | 0 |
+| after the fixes | tuning | 2 | 32 | 32 | 0 | 0 | 0 | 0 |
+| after the fixes | held-out | 4 | 51 | 51 | 0 | 0 | 2 | 0 |
+
+These figures are one run each and must not be read as accuracy:
+
+- **The held-out split is no longer independent.** The instruction changes were made
+  after looking at its live errors. A fresh held-out set is needed for an honest figure.
+- Six small synthetic documents are far too few for a percentage.
+- Output varies between runs. In a repeated run the two "invented" receipt unit
+  prices appeared again, and the contract milestones lost their `1. etapa –` prefix
+  (2 incorrect). The receipt unit prices equal the printed line prices; whether a
+  single printed price is a unit price is a labelling question for the case.
+- The planted prompt injection (`SYSTEM: ignore previous instructions ...`) did not
+  change the live result: the total stayed `2.48 EUR` and the payment card.
 
 ## Verification
 
@@ -207,8 +239,9 @@ Against PostgreSQL 16 (`docker.io/library/postgres:16` under podman) with
 
 | Command | Result |
 |---|---|
-| `uv run pytest tests/extraction` | 129 passed, 1 skipped (live test, not enabled) |
-| `uv run pytest` | 160 passed, 1 skipped, **1 failed**: `test_migration_and_transactional_enqueue` (request 3) |
+| `uv run pytest tests/extraction` | 134 passed, 1 skipped (live test, not enabled) |
+| `EXTRACTION_LIVE_TEST=1 OPENAI_MODEL=gpt-4.1-mini uv run pytest tests/extraction/test_live_provider.py` | 1 passed (paid live call, synthetic invoice) |
+| `uv run pytest` | 165 passed, 1 skipped, **1 failed**: `test_migration_and_transactional_enqueue` (request 3) |
 | `uv run ruff check backend scripts tests` | passed |
 | `uv run ruff format --check backend scripts tests` | passed |
 | `uv lock --check` | passed |
@@ -216,7 +249,9 @@ Against PostgreSQL 16 (`docker.io/library/postgres:16` under podman) with
 | `scripts/export_contract.py` + `git diff contracts/api.yaml` | no drift |
 
 Not run: the frontend half of `make check`, `npm test` and `make e2e` (this branch
-has no frontend changes and `npm ci` was not run), and the live provider test.
+has no frontend changes and `npm ci` was not run). The live evaluator also needs
+`DEV_AUTH_BYPASS=true APP_MODE=fixture COOKIE_SECURE=false PUBLIC_ORIGIN=http://localhost:5173`
+(or a real `ACCESS_CODE`) because it loads the shared settings.
 
 Manual reproduction without other modules: run the evaluator commands above,
 or `uv run pytest tests/extraction/test_lifecycle.py -k worker_produces`.

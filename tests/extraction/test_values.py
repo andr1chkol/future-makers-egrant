@@ -67,6 +67,9 @@ def test_ocr_noise_is_not_silently_corrected(printed):
         ("20 October 2026", "2026-10-20"),
         ("October 20, 2026", "2026-10-20"),
         ("5/5/2026", "2026-05-05"),
+        ("29.10.2026 18:05", "2026-10-29"),
+        ("29.10.2026 18:05:12", "2026-10-29"),
+        ("10/29/2026 2:32 PM", "2026-10-29"),
     ],
 )
 def test_date_normalization(printed, iso):
@@ -78,7 +81,9 @@ def test_slash_date_with_both_readings_is_ambiguous():
         normalize_date("03/04/2026")
 
 
-@pytest.mark.parametrize("printed", ["31.02.2026", "20.10.26", "next Monday", "2026-13-01"])
+@pytest.mark.parametrize(
+    "printed", ["31.02.2026", "20.10.26", "next Monday", "2026-13-01", "18:05", "29.10.2026 25"]
+)
 def test_impossible_or_incomplete_dates_are_rejected(printed):
     with pytest.raises(UnrecognizedValue):
         normalize_date(printed)

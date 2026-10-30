@@ -164,8 +164,10 @@ def date_candidates(printed: str) -> set[date]:
     Dot and dash separated day-first dates are unambiguous in the Slovak documents
     this product handles. Slash dates are read both ways because US-formatted
     receipts also occur. Two-digit years are rejected rather than guessed.
+    A time of day after the date, as printed on receipts, is ignored.
     """
     text = collapse_whitespace(printed).strip().rstrip(".").lower()
+    text = re.sub(r"\s+\d{1,2}:\d{2}(?::\d{2})?(?:\s?(?:h|hod\.?|am|pm))?$", "", text)
 
     def valid(year: int, month: int, day: int) -> set[date]:
         try:

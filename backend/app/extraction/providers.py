@@ -39,8 +39,13 @@ Rules:
 would require guessing, return null with empty evidence.
 - Copy values exactly as printed. Do not convert number or date formats, round, \
 translate, or compute anything. Never derive a missing total from other values.
-- Money: amount as printed; currency as an ISO 4217 code only when the document \
-states it by code or symbol, otherwise null.
+- Copy only the value itself, not neighbouring text from the same line: a name \
+without address or registration numbers, an item description without its \
+quantity or price, unless the field description asks for more.
+- Money: amount as printed; currency as an ISO 4217 code when the document states \
+it by code or symbol for that amount, its column or row, or once for all amounts \
+of the document. If no currency is stated, or the document uses several and none \
+is stated for that amount, return null.
 - Follow each field description to tell parties apart (supplier/seller/issuer \
 versus buyer/customer/recipient) and amounts apart (net without tax, tax/VAT, \
 gross with tax).

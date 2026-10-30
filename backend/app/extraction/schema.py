@@ -98,7 +98,10 @@ def value_schema(field: ProfileField, option_keys: list[str] | None) -> dict:
                 },
                 "currency": {
                     "type": ["string", "null"],
-                    "description": "ISO 4217 code shown or symbolized in the document, else null",
+                    "description": (
+                        "ISO 4217 code the document states for this amount, its column "
+                        "or the whole document, else null"
+                    ),
                 },
             }
         )
