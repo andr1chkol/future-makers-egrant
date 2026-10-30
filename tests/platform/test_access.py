@@ -18,7 +18,7 @@ def test_fixture_no_provider_startup_and_unavailable_routes():
             "mode": "fixture",
         }
         assert UUID(result.headers["x-request-id"])
-        response = client.get("/api/v1/documents")
+        response = client.get("/api/v1/extractions")
         assert response.status_code == 503
         assert response.json()["error"]["code"] == "FEATURE_UNAVAILABLE"
         assert client.get("/api/v1/documents?limit=201").status_code == 422

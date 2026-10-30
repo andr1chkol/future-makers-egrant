@@ -16,6 +16,7 @@ jobs:
         options: --health-cmd "pg_isready -U egrant -d egrant_test" --health-interval 2s --health-retries 30
     env:
       TEST_DATABASE_URL: postgresql+psycopg://egrant:local-test-only@localhost:5432/egrant_test
+      INTEGRATION_E2E_DATABASE_URL: postgresql+psycopg://egrant:local-test-only@localhost:5432/egrant_test_e2e_integration
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -28,13 +29,48 @@ jobs:
           version: '0.13.6'
           python-version: '3.12'
       - run: make install
+        id: install
       - run: make check
-      - run: make test
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+      - run: uv run pytest
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+      - run: npm test
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        working-directory: frontend
       - run: npx playwright install --with-deps chromium
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         working-directory: frontend
       - run: make e2e
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+      - run: PGPASSWORD=local-test-only createdb -h localhost -U egrant egrant_test_e2e_integration
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+      - run: make e2e-integration
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+      - run: PGPASSWORD=local-test-only createdb -h localhost -U egrant egrant_test_profiles_browser
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+      - run: make e2e-profiles
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        env:
+          TEST_DATABASE_URL: postgresql+psycopg://egrant:local-test-only@localhost:5432/egrant_test_profiles_browser
+      - run: PGPASSWORD=local-test-only createdb -h localhost -U egrant egrant_test_documents_e2e
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+      - run: make e2e-documents
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        env:
+          DOCUMENT_E2E_DATABASE_URL: postgresql+psycopg://egrant:local-test-only@localhost:5432/egrant_test_documents_e2e
+      - run: PGPASSWORD=local-test-only createdb -h localhost -U egrant egrant_test_full_product_e2e
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+      - run: make e2e-full-product
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        env:
+          FULL_PRODUCT_E2E_DATABASE_URL: postgresql+psycopg://egrant:local-test-only@localhost:5432/egrant_test_full_product_e2e
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: foundation-screenshots
-          path: docs/release/*.png
+          name: integration-browser-artifacts
+          include-hidden-files: true
+          path: |
+            docs/release/*.png
+            frontend/test-results/
+            .private/full-product-playwright/
+            .private/browser-results/
