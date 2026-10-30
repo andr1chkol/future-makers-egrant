@@ -108,7 +108,7 @@ test("persists two distinct manager configurations through the real API and Post
       page.getByRole("button", { name: "Spustiť skúšku", exact: true }),
     ).toBeDisabled();
     await expect(
-      page.getByText(/Táto funkcia na serveri ešte nie je pripojená/),
+      page.getByText(/Nie je dostupný žiadny spracovaný dokument/),
     ).toBeVisible();
     if (index === 0) {
       await page.setViewportSize({ width: 1440, height: 1000 });

@@ -8,6 +8,8 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException
 
+from app.documents.ocr import ocr_configured
+from app.documents.routes import router as documents_router
 from app.integrations.routes import router as integrations_router
 from app.platform.access import (
     COOKIE_NAME,
@@ -23,6 +25,7 @@ from app.platform.logging import log, request_id
 from app.platform.models import AccessSession
 from app.platform.routes import router
 from app.platform.settings import get_settings
+from app.platform.upload_limit import UploadBodyLimit
 from app.profiles.routes import router as profiles_router
 
 ERROR_RESPONSES = {
@@ -46,6 +49,8 @@ def create_app() -> FastAPI:
         openapi_url=None,
         responses=ERROR_RESPONSES,
     )
+
+    app.add_middleware(UploadBodyLimit)
 
     @app.middleware("http")
     async def correlate(request: Request, call_next):
@@ -127,13 +132,14 @@ def create_app() -> FastAPI:
         # Keys alone do not constitute an implemented and verified adapter.
         return {
             "data": {
-                "ocrConfigured": False,
+                "ocrConfigured": ocr_configured(),
                 "aiConfigured": False,
                 "egrantConfigured": False,
                 "mode": get_settings().app_mode,
             }
         }
 
+    app.include_router(documents_router, prefix="/api/v1", dependencies=[Depends(require_access)])
     app.include_router(router, prefix="/api/v1", dependencies=[Depends(require_access)])
     app.include_router(
         integrations_router, prefix="/api/v1", dependencies=[Depends(require_access)]

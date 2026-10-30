@@ -3,17 +3,18 @@
 Document-to-form extraction with mandatory human review.
 Repository: https://github.com/andr1chkol/future-makers-egrant.
 
-On `codex/integration`, the reviewed profiles module supports illustrative form
+On `codex/documents-integration`, private document intake and immutable normalized
+sources are connected to the shared API and worker. The profiles module supports illustrative form
 import, mapping configuration and immutable profile versions. Confirmed submission
 persistence, idempotent JSON export, history/status pages and recovery logging are
-also implemented. Missing document, extraction and review registrations return
+also implemented. Missing extraction and review registrations return
 `503 FEATURE_UNAVAILABLE`; they are not replaced with runtime example records.
 Existing exports remain downloadable from their stored immutable payload.
 
 The published `bootstrap-v1` is commit
 `88d1b959c524cfd559d01ee8ff6ac3f183f7c9e8`. It remains unchanged. Domain
 modules are integrated through independently reviewed PRs; the complete product
-workflow is still pending. OCR, AI and eGrant application writes are unavailable.
+workflow is still pending. OCR requires explicit Tesseract configuration; AI and eGrant application writes are unavailable.
 Credentials alone do not enable them. Export JSON does not apply data to eGrant.
 See `docs/release/INTEGRATION-HANDOFF.md` for evidence and remaining dependencies.
 
@@ -25,7 +26,7 @@ with npm. Docker runs the application; host Python/Node are for checks and tests
 ```sh
 git clone https://github.com/andr1chkol/future-makers-egrant.git
 cd future-makers-egrant
-git switch codex/integration
+git switch codex/documents-integration
 cp .env.example .env
 make dev
 ```
@@ -170,3 +171,45 @@ assembly. The fixture/test interface doubles are not product adapters.
 requests, demo procedure, remaining evaluation scenarios and release checklist.
 No external application write is enabled. A future live write needs a documented
 application-data interface, authorized test target and explicit human confirmation.
+
+## Document runtime and cleanup
+
+Production storage is supported in the Linux containers. macOS supports local
+POSIX development; native Windows storage is explicitly unavailable. Use Docker
+on Windows. No O_NOFOLLOW protection is replaced with zero. Browser launcher
+paths and environment configuration support Windows syntax, but native Windows
+application/storage tests were not executed.
+
+The API bounds the complete raw upload to DOCUMENT_MAX_BATCH_BYTES plus 1 MiB
+for multipart framing before multipart parsing begins, including chunked bodies.
+Per-file and total content limits still apply. API and worker read all DOCUMENT_*
+settings from the same Compose env_file. The image includes Tesseract and slk/eng
+language data. To enable it, set DOCUMENT_OCR_PROVIDER=tesseract and
+DOCUMENT_OCR_EXECUTABLE=/usr/bin/tesseract, then recreate API and worker. Default
+OCR remains disabled. The synthetic Linux smoke test does not verify Slovak OCR
+accuracy on real applicant documents.
+
+Run orphan cleanup only after all upload processes use this assembly:
+
+```sh
+docker compose exec worker uv run --no-sync python -m app.documents.cleanup
+```
+
+Cleanup considers UUID originals older than one hour, takes the same PostgreSQL
+transaction lock as intake, and checks for a committed document before removing
+anything. It skips active uploads, accepted originals, symlinks and non-UUID files.
+Do not remove private-volume files manually. Interrupted dot-prefixed staging
+files are excluded from this command.
+
+The document browser suite uses an isolated database named
+`egrant_test_documents_e2e`, real document routes/storage/worker and explicit
+neighboring profile/extraction fixtures:
+
+```sh
+export DOCUMENT_E2E_DATABASE_URL=postgresql+psycopg://egrant:local-test-only@localhost:55432/egrant_test_documents_e2e
+make e2e-documents
+```
+
+See docs/release/DOCUMENTS-ASSEMBLY.md for exact verification and the extraction
+fixture compatibility blocker. Separate review links are preserved for separate
+documents. No unconfirmed data is exported or applied.

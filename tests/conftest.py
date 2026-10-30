@@ -1,5 +1,6 @@
 import os
 import subprocess
+import sys
 
 import pytest
 from app.platform.database import session_factory
@@ -35,7 +36,8 @@ def database(monkeypatch):
         connection.execute(text("DROP SCHEMA public CASCADE"))
         connection.execute(text("CREATE SCHEMA public"))
     subprocess.run(
-        [".venv/bin/alembic", "-c", "backend/alembic.ini", "upgrade", "head"], check=True
+        [sys.executable, "-m", "alembic", "-c", "backend/alembic.ini", "upgrade", "head"],
+        check=True,
     )
     factory = sessionmaker(engine, expire_on_commit=False)
     yield factory

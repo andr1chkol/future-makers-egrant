@@ -1,3 +1,4 @@
+import path from "node:path";
 import { defineConfig } from "@playwright/test";
 import { fileURLToPath } from "node:url";
 
@@ -11,6 +12,14 @@ if (!new URL(databaseUrl).pathname.slice(1).startsWith("egrant_test")) {
   );
 }
 
+const python = path.resolve(
+  process.cwd(),
+  "..",
+  process.platform === "win32"
+    ? ".venv/Scripts/python.exe"
+    : ".venv/bin/python",
+);
+
 export default defineConfig({
   testDir: "./e2e",
   testMatch: "integration.spec.ts",
@@ -18,8 +27,7 @@ export default defineConfig({
   use: { baseURL: "http://localhost:5175", browserName: "chromium" },
   webServer: [
     {
-      command:
-        "../.venv/bin/python -m uvicorn browser_app:app --app-dir ../tests/profiles --port 8012 --no-access-log",
+      command: `"${python}" -m uvicorn browser_app:app --app-dir ../tests/profiles --port 8012 --no-access-log`,
       env: {
         PYTHONPATH: "../backend",
         DATABASE_URL: databaseUrl,
@@ -33,8 +41,8 @@ export default defineConfig({
       reuseExistingServer: false,
     },
     {
-      command:
-        "API_PROXY_TARGET=http://127.0.0.1:8012 npm run dev -- --port 5175",
+      command: "npm run dev -- --port 5175",
+      env: { API_PROXY_TARGET: "http://127.0.0.1:8012" },
       cwd: frontend,
       port: 5175,
       reuseExistingServer: false,

@@ -1,3 +1,11 @@
+# Documents assembly follow-up
+
+Current document assembly and verification: [DOCUMENTS-ASSEMBLY.md](DOCUMENTS-ASSEMBLY.md).
+It supersedes the historical "documents unpublished" rows below. Original source
+9a9bfa5 is published in draft PR #10; the formal peer-review correction af2765e is
+incorporated. No historical independent verdict is promoted to the new integration
+head. Extraction/review and final release acceptance remain pending.
+
 # Member 5 integration handoff
 
 Repository: <https://github.com/andr1chkol/future-makers-egrant>.

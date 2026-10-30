@@ -25,7 +25,7 @@ with create_engine(url, hide_parameters=True).begin() as connection:
     connection.execute(text("DROP SCHEMA public CASCADE"))
     connection.execute(text("CREATE SCHEMA public"))
 subprocess.run(
-    [str(ROOT / ".venv/bin/alembic"), "-c", "backend/alembic.ini", "upgrade", "head"],
+    [sys.executable, "-m", "alembic", "-c", "backend/alembic.ini", "upgrade", "head"],
     cwd=ROOT,
     check=True,
 )

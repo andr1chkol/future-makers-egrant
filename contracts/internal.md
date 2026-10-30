@@ -79,12 +79,12 @@ no lease renewal. At-least-once execution still requires idempotent domain write
 A late worker cannot finalize the job, but domain writes need their own constraints.
 
 `app.worker.build_registry` explicitly reserves document.process,
-extraction.process, submission.apply. Document/extraction handlers currently raise HandlerUnavailableError
+extraction.process, submission.apply. The document handler is app.documents.service.process_document. Extraction handlers currently raise HandlerUnavailableError
 (app.platform.jobs) and fail HANDLER_UNAVAILABLE. submission.apply uses
 app.integrations.service.apply_submission, which makes no external calls while
 the eGrant adapter is unavailable. It preserves interrupted applying operations
 as unknown and fails undispatched operations. The worker recovers terminal
-apply leases before polling again. Owners request document/extraction replacement
+apply leases before polling again. The worker invokes app.documents.service.reconcile_interrupted with a fresh Session on every polling cycle. Owners request extraction replacement
 imports/registration in their handoff. Register exactly once; duplicate registrations raise ValueError.
 A submission timeout or exhausted apply lease requires owner reconciliation to
 unknown before any new write. Never automatically retry a possibly applied effect.
@@ -232,3 +232,29 @@ After review, register process_extraction explicitly and compute aiConfigured
 from the actual configured OpenAI adapter. Keep ocrConfigured/egrantConfigured
 false until their respective implemented adapters exist. Preserve explicit
 fixture mode; presence of a key alone must not bypass a missing module.
+
+## Documents assembly
+
+The six document shells are replaced by app.documents.routes.router with the
+shared access dependency and unchanged binary response metadata. Normalized reads
+use app.documents.service.get_normalized without committing. Recovery uses
+reconcile_interrupted(session: Session) -> None, a bounded batch of 50, and logs
+the original job correlation after commit. The production registry contains one
+document.process handler. Alembic imports document models and discovers their
+owned migration directory. 0503_documents_assembly joins the published
+0502_profiles_assembly and original 0101_documents; published migrations are unchanged.
+
+Intake holds a negative bigint advisory lock derived from each generated document
+UUID across private storage and database commit. app.documents.cleanup uses the
+same lock before checking row absence and deleting an old orphan. Positive hash
+locks remain reserved for duplicate serialization. See the documents assembly
+handoff for supported runtime and multipart boundary limits.
+
+The existing extraction fixture expects row-based normalized units and fingerprints
+unit IDs. Actual CSV intake emits UUIDv5 cell units tied to each new document.
+An isolated public-interface probe against extraction f21eb84 reaches durable
+FIXTURE_NOT_AVAILABLE. Member 2 must supply fixture recognition/rebinding for actual
+cell sources, retaining genuine source IDs/quotes and explicit fixture-only mode.
+Do not alter the synthetic CSV bytes/hash or substitute the old normalized example
+in the production documents service. Full successful extraction assembly remains
+blocked pending that owner change and exact-head independent review.

@@ -30,3 +30,6 @@ e2e-integration:
 e2e-profiles:
 	cd frontend && npx playwright test --config src/features/profiles/playwright.config.ts
 	cd frontend && npx playwright test --config src/features/profiles/playwright.integration.config.ts
+
+e2e-documents:
+	frontend/node_modules/.bin/playwright test --config tests/documents/playwright.config.cjs
