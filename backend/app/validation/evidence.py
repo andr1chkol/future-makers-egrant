@@ -1,9 +1,9 @@
 """Check provider-cited evidence against the normalized document.
 
 Only the source unit is trusted for location: page, sheet and cell are copied
-from it, never from the provider. Quotes are compared after collapsing
-whitespace because OCR and spreadsheet normalization break lines differently
-from how a model reproduces them; any other difference makes a quote unverified.
+from it, never from the provider. Matching tolerates whitespace changes from
+OCR line breaks, but stored quotes always use the exact matching source span.
+Any other difference makes a quote unverified.
 """
 
 import re
@@ -40,9 +40,10 @@ def resolve_evidence(
             resolved.unknown_units = True
             continue
         quote = evidence.quote
-        if quote is not None and not quote_in_text(quote, unit.text):
-            resolved.unverified_quotes = True
-            quote = None
+        if quote is not None:
+            quote = source_excerpt(quote, unit.text)
+            if quote is None:
+                resolved.unverified_quotes = True
         if (unit.id, quote) in seen:
             continue
         seen.add((unit.id, quote))
@@ -62,9 +63,12 @@ def resolve_evidence(
     return resolved
 
 
-def quote_in_text(quote: str, text: str) -> bool:
-    needle = collapse_whitespace(quote)
-    return bool(needle) and needle in collapse_whitespace(text)
+def source_excerpt(quote: str, text: str) -> str | None:
+    words = quote.split()
+    if not words:
+        return None
+    match = re.search(r"\s+".join(re.escape(word) for word in words), text)
+    return match.group() if match else None
 
 
 def printed_text_supported(printed: str, supporting_texts: list[str]) -> bool:
@@ -82,3 +86,24 @@ def printed_text_supported(printed: str, supporting_texts: list[str]) -> bool:
     after = r"(?!\d)(?![.,'’]\d)" if needle[-1].isdigit() else ""
     pattern = re.compile(before + re.escape(needle) + after)
     return any(pattern.search(collapse_whitespace(text).casefold()) for text in supporting_texts)
+
+
+def printed_sign_supported(printed: str, source_texts: list[str]) -> bool:
+    """A cropped quote must not hide a debit sign in the original unit."""
+    needle = collapse_whitespace(printed).casefold()
+    if not needle:
+        return False
+    for text in source_texts:
+        text = collapse_whitespace(text).casefold()
+        for match in re.finditer(re.escape(needle), text):
+            before, after = text[: match.start()], text[match.end() :]
+            if before.rstrip().endswith(("-", "−", "(")):
+                continue
+            if after.lstrip().startswith(("-", "−", ")")):
+                continue
+            if needle[0].isdigit() and before and before[-1].isdigit():
+                continue
+            if needle[-1].isdigit() and after and after[0].isdigit():
+                continue
+            return True
+    return False

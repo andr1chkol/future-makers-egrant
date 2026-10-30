@@ -23,7 +23,11 @@ from app.platform.contracts import (
     Warning,
     warning_identity,
 )
-from app.validation.evidence import printed_text_supported, resolve_evidence
+from app.validation.evidence import (
+    printed_sign_supported,
+    printed_text_supported,
+    resolve_evidence,
+)
 from app.validation.rules import check_extraction_rules
 from app.validation.values import (
     ISO_CURRENCIES,
@@ -41,6 +45,7 @@ MESSAGES = {
     "NUMBER_AMBIGUOUS": "The number can be read with either separator as decimal point",
     "DATE_AMBIGUOUS": "The date can be read with day and month in either order",
     "OPTION_NOT_PERMITTED": "The proposed value is not one of the permitted options",
+    "CURRENCY_AMBIGUOUS": "The currency symbol does not identify a single currency",
     "CURRENCY_MISSING": "The amount has no currency stated in the document",
     "CURRENCY_INVALID": "The currency is not a supported ISO 4217 code",
     "CURRENCY_NOT_IN_DOCUMENT": "The currency is not mentioned in the document",
@@ -74,10 +79,13 @@ class DocumentContext:
     options: OptionKeys
     units: dict[str, SourceUnit] = field(init=False)
     currencies: set[str] = field(init=False)
+    definite_currencies: set[str] = field(init=False)
 
     def __post_init__(self):
         self.units = {unit.id: unit for unit in self.document.units}
-        self.currencies = currencies_in_text("\n".join(unit.text for unit in self.document.units))
+        text = "\n".join(unit.text for unit in self.document.units)
+        self.currencies = currencies_in_text(text)
+        self.definite_currencies = currencies_in_text(text, include_ambiguous=False)
 
 
 def assemble_extraction(
@@ -163,8 +171,11 @@ def assemble_value(
     except ValueRejected as rejection:
         return missing(spec, evidence.sources), [flagged(rejection.code)]
 
-    if isinstance(value, Money) and value.currency not in context.currencies:
-        issues.append("CURRENCY_NOT_IN_DOCUMENT")
+    if isinstance(value, Money):
+        if value.currency not in context.currencies:
+            issues.append("CURRENCY_NOT_IN_DOCUMENT")
+        elif value.currency not in context.definite_currencies:
+            issues.append("CURRENCY_AMBIGUOUS")
     if evidence.unknown_units:
         issues.append("SOURCE_UNIT_UNKNOWN")
     if evidence.unverified_quotes:
@@ -174,7 +185,15 @@ def assemble_value(
     elif (
         isinstance(raw.printed, str)
         and not option_keys
-        and not printed_text_supported(raw.printed, evidence.supporting_texts)
+        and (
+            not printed_text_supported(raw.printed, evidence.supporting_texts)
+            or (
+                spec.type in {"decimal", "money"}
+                and not printed_sign_supported(
+                    raw.printed, [context.units[source.unit_id].text for source in evidence.sources]
+                )
+            )
+        )
     ):
         # Catches values the model produced from instructions or general
         # knowledge while citing a real but unrelated part of the document.

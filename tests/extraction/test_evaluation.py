@@ -1,4 +1,5 @@
 import json
+import shutil
 from pathlib import Path
 
 from app.extraction.evaluation import evaluate, main
@@ -42,7 +43,7 @@ def test_evaluation_is_repeatable_and_reports_json(capsys):
 def test_invalid_reply_counts_every_expected_value_as_missing(tmp_path: Path):
     split = tmp_path / "split"
     split.mkdir()
-    (tmp_path / "profiles").symlink_to(EVALUATION / "profiles")
+    shutil.copytree(EVALUATION / "profiles", tmp_path / "profiles")
     case = json.loads((EVALUATION / "tuning" / "receipt-card.json").read_text())
     case["recordedReply"] = {"fields": {}}
     (split / "broken.json").write_text(json.dumps(case))

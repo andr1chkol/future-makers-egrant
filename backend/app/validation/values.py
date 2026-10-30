@@ -207,13 +207,15 @@ def normalize_date(printed: str) -> str:
     return value.isoformat()
 
 
-def currencies_in_text(text: str) -> set[str]:
+def currencies_in_text(text: str, *, include_ambiguous: bool = True) -> set[str]:
     """Currencies a document visibly mentions, by ISO code or by symbol."""
     lowered = text.lower()
     # Case-sensitive so ordinary words do not match; camelCase headers such as
     # "totalEUR" in spreadsheet exports still count as a mention.
     found = {code for code in ISO_CURRENCIES if re.search(rf"(?<![A-Z]){code}(?![A-Z])", text)}
     for symbol, codes in CURRENCY_SYMBOLS.items():
+        if not include_ambiguous and len(codes) > 1:
+            continue
         if symbol.isalpha():
             if re.search(rf"(?<![^\W\d_]){re.escape(symbol)}(?![^\W\d_])", lowered):
                 found |= codes

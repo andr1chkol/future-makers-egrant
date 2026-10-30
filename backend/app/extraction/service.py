@@ -8,10 +8,10 @@ token replaced and discards its result instead of overwriting a newer run.
 
 import logging
 import time
-from datetime import timedelta
+from datetime import UTC, timedelta
 from uuid import UUID, uuid4
 
-from sqlalchemy import func, select, update
+from sqlalchemy import String, cast, func, select, update
 from sqlalchemy.orm import Session
 
 from app.extraction.assembly import assemble_extraction
@@ -237,10 +237,26 @@ def recover_terminal_extractions(session: Session) -> None:
     is still waiting on the provider.
     """
     recovered = []
+    same_run = (Job.kind == "extraction.process") & (
+        Job.payload["resource_id"].astext == cast(ExtractionRecord.id, String)
+    )
+    active_job = select(Job.id).where(same_run, Job.status.in_(("queued", "running"))).exists()
+    latest_status = (
+        select(Job.status)
+        .where(same_run)
+        .order_by(Job.created_at.desc(), Job.id.desc())
+        .limit(1)
+        .scalar_subquery()
+    )
     with session.begin():
         records = session.scalars(
             select(ExtractionRecord)
-            .where(ExtractionRecord.status.in_(("queued", "running")))
+            # Filter before LIMIT: active runs must not consume every sweep slot.
+            .where(
+                ExtractionRecord.status.in_(("queued", "running")),
+                ~active_job,
+                latest_status == "failed",
+            )
             .order_by(ExtractionRecord.updated_at, ExtractionRecord.id)
             .limit(RECOVERY_BATCH_SIZE)
             .with_for_update(skip_locked=True)
@@ -432,6 +448,6 @@ def to_dto(record: ExtractionRecord) -> Extraction:
             "tables": record.tables,
             "warnings": record.warnings,
             "error": record.error,
-            "createdAt": record.created_at,
+            "createdAt": record.created_at.astimezone(UTC),
         }
     )
