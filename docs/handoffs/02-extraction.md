@@ -103,10 +103,14 @@ response schemas are tested against the frozen `contracts/api.yaml`.
    `codex/integration`.
 3. **Migrations:** `0201_extractions` (down revision `0001_platform`) creates the
    table `extractions`. Alembic `env.py` does not need my models; the migration is
-   explicit. **`tests/platform/test_jobs.py::test_migration_and_transactional_enqueue`
-   fails on this branch** because it asserts that head is `0001_platform`. The test
-   is right for bootstrap, but any module migration breaks it. It needs a member-5
-   change, e.g. asserting that `0001_platform` is an ancestor, or the merge revision.
+   explicit. After review, add it to a new merge revision with
+   `0502_profiles_assembly` on `codex/integration`.
+   `tests/platform/test_jobs.py::test_migration_and_transactional_enqueue` asserted
+   head `0001_platform`, which no module branch can satisfy. This branch carries the
+   same check member 5 uses on `codex/integration` (database at the single script
+   head, required revisions and tables present), with this branch's revision and
+   table: `{"0001_platform", "0201_extractions"}` and `extractions`. When merging,
+   take the union of both sets; nothing is weakened.
 4. **Capabilities:** `aiConfigured` is hardcoded to `false` in `app/main.py`.
    It can be `OpenAIProvider.from_settings(get_settings()) is not None` once the
    router is mounted. Live calls were verified with `gpt-4.1-mini` (see Evaluation).
@@ -248,7 +252,7 @@ Against PostgreSQL 16 (`docker.io/library/postgres:16` under podman) with
 |---|---|
 | `uv run pytest tests/extraction` | 145 passed, 1 skipped (live test, not enabled) |
 | `EXTRACTION_LIVE_TEST=1 OPENAI_MODEL=gpt-4.1-mini uv run pytest tests/extraction/test_live_provider.py` | 1 passed (paid live call, synthetic invoice; repeated after the deadline change) |
-| `uv run pytest` | 176 passed, 1 skipped, **1 failed**: `test_migration_and_transactional_enqueue` (request 3) |
+| `uv run pytest` | 177 passed, 1 skipped |
 | `uv run ruff check backend scripts tests` | passed |
 | `uv run ruff format --check backend scripts tests` | passed |
 | `uv lock --check` | passed |
