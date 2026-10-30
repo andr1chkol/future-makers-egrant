@@ -7,9 +7,11 @@ and matches the SHA supplied by the team. No frozen contracts or shared runtime
 files were changed.
 
 Implementation history: `9a9bfa5be372fbac5a7408b0648f32ff75cb8460` contains the
-original module. Code and CSV compatibility were verified at
-`a5f416cbb5eccc2945a57d0dc5e39599ed678764`; the following handoff commit changes
-documentation only. The published PR head is the exact SHA to use for member 5's
+original module. CSV compatibility is in `a5f416cbb5eccc2945a57d0dc5e39599ed678764`.
+The verified code snapshot, including the delayed-handler concurrency fix, is
+`af181d5be1136e39518b7ca7087369e99776b082`; the following handoff commit changes
+documentation only. Published PR: https://github.com/andr1chkol/future-makers-egrant/pull/9.
+The published PR head is the exact SHA to use for member 5's
 review. Source branch: `xandreiev-dev/future-makers-egrant:codex/documents`;
 target: `andr1chkol/future-makers-egrant:main`.
 
@@ -141,7 +143,10 @@ Parsing runs in a killable subprocess, outside database transactions. Linux also
 receives a 768 MiB address-space limit; that memory limit is unavailable on Windows.
 The full processing timeout fits inside the platform's fixed 60-second lease.
 Domain publication locks and compares the document token and current job lease;
-an expired or replaced worker cannot publish sources. Results and the ready state
+an expired or replaced worker cannot publish sources. A second invocation under
+an already-processing lease returns a conflict rather than reporting completion;
+otherwise the worker could mark a job done before the first invocation publishes.
+Results and the ready state
 commit together. Repeated ready jobs are no-ops. Crashed final leases are exposed
 as `PROCESSING_INTERRUPTED` and persisted by reconciliation.
 
@@ -242,7 +247,7 @@ loopback; production database credentials are outside this handoff.
 | Actual check | Result |
 | --- | --- |
 | Full `python -m pytest -q` on PostgreSQL 16.15 | 96 passed, 1 failed, exit 1 |
-| `python -m pytest tests/documents -q` on PostgreSQL 16.15, CSV follow-up | 71 passed, exit 0, 68.62 seconds |
+| `python -m pytest tests/documents -q` on PostgreSQL 16.15, final code snapshot | 72 passed, exit 0, 68.79 seconds |
 | Shared failure | `test_private_storage_is_immutable_and_rejects_traversal`: missing Windows `os.O_NOFOLLOW` |
 | `ruff check backend scripts tests` | Passed, exit 0 |
 | `ruff format --check backend scripts tests` | Passed, exit 0 |
@@ -263,8 +268,15 @@ dimensions, duplicates, concurrent retries, bounded retries, stale workers,
 restart recovery, terminal crash reconciliation, access checks, exact OpenAPI
 operations, log correlation and realistic synthetic secret/PII redaction.
 
-The full-suite 96/1 result predates the CSV follow-up. The follow-up reran all
-document tests, frontend tests/build, browser scenarios and lint/format checks;
+The full-suite 96/1 result predates the CSV follow-up. The CSV follow-up reran all
+document tests, frontend tests/build, browser scenarios and lint/format checks.
+The final worker fix reran all 72 document tests on PostgreSQL 16.15, including
+the new delayed-before-handler concurrency regression. That regression was also
+run against pre-fix code from `1e7c134b70211f7f30026e2d7db9495de40ec3ff` as an
+intentional negative control: it failed because the job became `done` while the
+document remained `processing`. Fixed code keeps the job retryable and completes
+without duplicate sources. The negative-control failure is not a failed final
+suite. Frontend source is unchanged since its eight-test/build/browser checks;
 the known shared Windows storage defect remains outside this branch's ownership.
 
 Cross-module smoke command (after extraction is assembled):
