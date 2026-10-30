@@ -10,7 +10,7 @@
 - Base, merge base, and `bootstrap-v1`: `88d1b959c524cfd559d01ee8ff6ac3f183f7c9e8`; recorded `BASE_BRANCH=main`.
 - Review branch: `codex/extraction-peer-review-f21eb84`.
 - Fix commit tested: `e847a02dbf3a2388f7c4a5ecf577cde5e18f508d`.
-- Final head recheck: {{HEAD_RECHECK}}.
+- Final head recheck: 2026-10-30 20:56 Europe/Budapest; GitHub still reports the reviewed head and base above.
 - Followed `docs/team/06-PEER-REVIEW.md`; read AGENTS, root/team CONTRACT and QUALITY, API/internal contracts, shared examples, member-2 prompt, current handoff, and the older team summary. Applied bundled human-code and final-review, backend-reliability-review, and humanizer to report prose only.
 
 The isolated clone is `D:/CodexWorkspaces/egrant-extraction-review-f21eb84`. The member-1 author checkout was not edited or reset. The review uses published PR #6 code and shared fixtures; it does not depend on unpublished document changes or on documents PR #9.
@@ -19,37 +19,37 @@ The isolated clone is `D:/CodexWorkspaces/egrant-extraction-review-f21eb84`. The
 
 Line references below identify the original reviewed head, not the repaired files.
 
-### R1 [P1] A cropped amount quote can hide a debit sign — fixed
+### R1 [P1] A cropped amount quote can hide a debit sign: fixed
 
 `backend/app/extraction/assembly.py:177` checks a printed value inside its quote. A provider can return positive `12,50` with quote `12,50` from source `-12,50 EUR`; the amount becomes `12.50` with status `found`. The same error occurs with trailing minus signs and accounting parentheses, including a null quote. A verified positive amount can therefore represent a printed debit.
 
 The fix also checks the surrounding original source unit for sign markers. Contradictions keep the proposed value for human review and add `VALUE_NOT_IN_EVIDENCE`; they do not silently reverse its sign. Coverage includes leading/trailing Unicode minus, accounting parentheses, spaced markers, currency prefixes, and a numeric supplier name that must not be treated as a debit.
 
-### R2 [P2] Whitespace matching persists a non-verbatim quote — fixed
+### R2 [P2] Whitespace matching persists a non-verbatim quote: fixed
 
 `backend/app/validation/evidence.py:43` accepts quotes after whitespace normalization but stores the provider's original quote. Source `Demo   Paper\ns.r.o.` can produce stored quote `Demo Paper s.r.o.`, which is not a substring of the source. This violates the exact-excerpt contract and can break source highlighting.
 
 Matching still tolerates OCR whitespace changes. The stored quote now comes from the exact matching span of the source text. Other quote differences remain unverified.
 
-### R3 [P2] Active runs can starve terminal recovery — fixed
+### R3 [P2] Active runs can starve terminal recovery: fixed
 
 `backend/app/extraction/service.py:243` limits the candidate batch before checking job status. With batch size 1, put an older active run before a newer stranded run whose job failed. Repeated sweeps examine only the active run, leaving the stranded run queued forever. The production batch size of 50 has the same issue with 50 older active runs.
 
 The query now excludes active jobs and requires a failed latest job before applying the limit. Row locks, `SKIP LOCKED`, the bounded write batch, the history recheck, and run-token fencing remain in place. Existing concurrent-retry, final-lease, late-worker, and repeat-sweep tests pass.
 
-### R4 [P2] Database timezone leaks into extraction timestamps — fixed
+### R4 [P2] Database timezone leaks into extraction timestamps: fixed
 
 `backend/app/extraction/service.py:435` returns the PostgreSQL timestamp unchanged. On this PostgreSQL instance, `Europe/Budapest` produces `+01:00`, although `contracts/internal.md` requires UTC output. The existing timestamp test failed on the original head.
 
 The DTO conversion now calls `astimezone(UTC)`. A regression also supplies an explicit non-UTC timestamp without depending on server configuration.
 
-### R5 [P2] An ambiguous currency symbol verifies a guessed ISO code — fixed
+### R5 [P2] An ambiguous currency symbol verifies a guessed ISO code: fixed
 
 `backend/app/extraction/assembly.py:166` treats every possible currency associated with `$` or `¥` as verified. Source `Total: $12.50` and a provider choice of `USD` produce `found`, although the source does not distinguish USD from other dollar currencies.
 
 The fix separates possible symbol matches from unambiguous codes/symbols. A guess supported only by an ambiguous symbol is `needs_review` with `CURRENCY_AMBIGUOUS`. An explicit `USD` code still verifies the value. The proposed currency is preserved for human review.
 
-### R6 [P2] Scalar and table option scopes collide — unresolved
+### R6 [P2] Scalar and table option scopes collide: unresolved
 
 `backend/app/extraction/schema.py:38` encodes a table scope as `table.column`, while `backend/app/extraction/service.py:119` and `:125` store scalar keys in the same dictionary. Public profile keys are unrestricted strings, unique only within their own scope.
 
@@ -86,13 +86,13 @@ Windows compatibility setup: copied the existing `alembic.exe` launcher to ignor
 |---|---|
 | Original head: `PY -m pytest tests/extraction tests/platform -q --tb=short` | Exit 1: 174 passed, 3 failed, 1 skipped. Failures: UTC output, Windows symlink privilege, unchanged platform storage. An earlier setup attempt lacked the dedicated database; it was corrected before this baseline run. |
 | First regression run before fixes: `PY -m pytest tests/extraction/test_peer_review.py -q --tb=short` | Exit 1: all initial 11 cases failed, reproducing R1–R4. Additional currency/sign cases reproduced R5 and exercised the repair. |
-| Final: `PY -m pytest -q --tb=short --basetemp=work/verification-final --junitxml=work/final-verification.xml` | {{FULL_RESULT}} |
-| Extraction cases in that final run | {{EXTRACTION_RESULT}} |
+| Final: `PY -m pytest -q --tb=short --basetemp=work/verification-final --junitxml=work/final-verification.xml` | Exit 1: 200 passed, 1 failed, 1 skipped in 102.00 s; the sole failure is unchanged Windows platform storage, detailed below. |
+| Extraction cases in that final run | 169 passed, 1 skipped, 0 failed/errors; extracted from the final JUnit result. The review adds 24 regression/behavior cases. |
 | `PY -m ruff check backend scripts tests` | Exit 0. |
 | `PY -m ruff format --check backend scripts tests` | Exit 0; 49 files formatted. |
 | `PY -m app.extraction.evaluation tests/extraction/evaluation/tuning` | Exit 0; 2 recorded cases, 32 expected values, 32 correct, 0 missing/incorrect/invented. |
 | `PY -m app.extraction.evaluation tests/extraction/evaluation/heldout` | Exit 0; 4 recorded cases, 51 expected values, 44 correct, 3 missing, 4 incorrect, 1 invented, 3 flagged; 9 expected rows, 8 returned. These are deliberately planted reply errors, not a model accuracy measurement. |
-| `PY scripts/scan_secrets.py` | {{SCAN_RESULT}} |
+| `PY scripts/scan_secrets.py` | Exit 0; 132 tracked files scanned before adding this report and 133 files after staging it. |
 | `PY scripts/export_contract.py`, normalized byte comparison, `git diff --exit-code -- contracts/api.yaml frontend/src/shared/api.generated.ts` | Exit 0 after removing export-only CRLF differences; no semantic or committed drift. |
 | `uv lock --check --offline --cache-dir D:/CodexWorkspaces/egrant-extraction-review-f21eb84/work/uv-cache` | Exit 0; 42 packages resolved. |
 | `git diff --check` | Exit 0. |
