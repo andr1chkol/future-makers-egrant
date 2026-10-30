@@ -1,28 +1,57 @@
 # Member 5 integration handoff
 
 Repository: <https://github.com/andr1chkol/future-makers-egrant>.
-Branch: `codex/integration`. BASE_BRANCH: `main`.
-Immutable baseline: `bootstrap-v1`, `88d1b959c524cfd559d01ee8ff6ac3f183f7c9e8`.
-Self-reviewed published code: `e0e1f952c94a686029dd80ee154e344c12affadc`.
-Tested local code: `38973034d735f5abac3ea8584bf0a9e396685e0b`.
-Both commits have tree `e0a6054c4b560dfda4278eaa2a3cd9ed0fda2de7`.
-The follow-up commit adds this handoff only; independent review must cover the
-complete final PR head, including documentation.
+Working branch: `codex/integration`. Target: `main`. PR: #4.
+Baseline: `bootstrap-v1`, `88d1b959c524cfd559d01ee8ff6ac3f183f7c9e8` (unchanged).
+Self-reviewed published assembly code: `a00989b108988d2a2a66f4a4ced4611f24f0be0a`.
+Tested local assembly: `dbf2d8cecea490506d2f88b687f72e377dc61a5b`.
+Both have tree `b828e0f79295b70f8b1cd83b6300a5aed8790047`.
+The follow-up handoff commit changes documentation only. Member 4 must review
+its actual final PR head; the old review of 0816377 does not approve this head.
 
-Verdict for the code SHA above: **ready for independent review of member-5 export
-and status scope**. The assembled product is **NOT READY**: members 1–4 are not
-registered on this branch and live providers are unavailable. This is author
-self-review, not member 4's independent review or member 1's release review.
+Verdict for a00989b: **implemented profiles/export assembly is ready for renewed
+independent review**. The complete product is **NOT READY**. Review and extraction
+lack independent verdicts; documents is unpublished. Their code is not registered
+or replaced with hidden fixtures. No final integration PR was merged into main.
 
-## Behavior and interfaces
+## Actual module disposition
 
-The integrations router replaces the three unavailable submission shells under
-the existing `/api/v1` access gate. OpenAPI, public DTOs, examples and generated
-client remain byte-for-byte compatible with bootstrap. No shared dependency was
-added. The Node engine declaration and lock metadata match the already locked
-test toolchain: Node ^22.12.0, ^24.0.0 or >=26.0.0.
+| Module | Source/integrated commit | Review evidence | Current tests | Remaining blocker |
+|---|---|---|---|---|
+| Recovery fix #5 | 07576383dbf81b6970d58f644f36a3f359fd4fd6, merged into integration at 9d28ff377729bcc1e67e1990284d96a88f17b572 | Member 4 reproduced P2 at old 0816377; supplied and tested fix. Report records ongoing-chat procedural limitation | 8 recovery tests pass, including 3 new correlated-log cases | New assembled PR head needs member 4 review |
+| Profiles #8 | e84509990a84e3121b79b7cd0681912230a61887, preserved as parent of a00989b | Member 2 PASS for exact e845099; reports copied unchanged into docs/reviews | 50 module backend tests, 25 module frontend tests, 3 profile browser scenarios; additional assembly tests | Real eGrant form format remains unverified |
+| Submission/export #4 | Existing implementation plus recovery fix and a00989b registrations | Old 0816377 verdict was CHANGES REQUIRED; P2 fix now included. No new independent PASS claimed | 41 integration tests, 4 browser scenarios; public profiles-to-export probe uses real PostgreSQL | New exports need real review/extraction services |
+| Human review #3 | 133e6ced9cbce21fb255fa77b45d3d335c47ec75, not merged/registered | No independent verdict/report found; member 3 review requested on PR | Owner reports 23 backend, 10 frontend, 3 browser tests; not rerun as assembled behavior here | Exact-head independent review, then router/models/0401 migration/browser registration |
+| Extraction #6 | 78d84d780aedde04cae35a86b2774255d202ed0d, Draft, not merged/registered | No independent verdict found; assigned reviewer member 1 | Owner reports 134 ordinary tests; not rerun as assembled behavior here | Review, terminal-job recovery implementation, handler/router/migration/capability registration |
+| Documents/OCR | No published source/PR found | None | No module tests available | Owner publishes implementation/handoff; normalized-unit compatibility; permitted provider access |
 
-Public synchronous services in `app.integrations.service`:
+Formal GitHub review lists are empty; the profiles PASS is a repository report,
+not an invented GitHub approval. Its reviewed SHA exactly matches PR #8. PR #8
+remains open against main; its reviewed source was assembled in codex/integration
+without merging that PR into main. PR #5 targeted codex/integration and was
+explicitly accepted after inspecting its diff, green CI and running recovery
+tests. Local histories and original commits were retained; no force push/reset.
+
+## Registered production behavior
+
+The seven form/profile shells are removed from app.platform.routes. The actual
+app.profiles.routes.router is included with the shared access dependency. Its
+existing ProfilesPage/ProfileEditorPage entrypoints are reached by the existing
+frontend router. Form import, complete original JSON preservation, configurable
+scalar/table mappings and immutable versions use the actual services/database.
+Imports remain visibly illustrative; no real eGrant form-export compatibility is
+claimed. The two low profile findings remain owner follow-ups: UUID list ordering
+and preserved whitespace in option keys. No option values were silently changed.
+
+The three submission routes remain protected and build payload server-side from
+the exact confirmed revision, pinned profile/form mapping, complete keys/rows,
+required values, permitted options and warning acknowledgements. A PostgreSQL
+unique key and canonical intent hash resolve concurrent duplicate requests and
+reject changed intent. Failed validation/serialization rolls back. Stored payloads
+survive upstream module unavailability; repeated JSON downloads return the same
+human corrections. Exported records mean a response was served, not an eGrant write.
+
+Public app.integrations.service functions remain synchronous:
 
 ```python
 create_submission(session: Session, request: CreateSubmission, idempotency_key: str) -> Submission
@@ -32,236 +61,198 @@ apply_submission(session: Session, id: UUID) -> None
 recover_interrupted_submissions(session: Session) -> None
 ```
 
-Create/export/apply/recovery own short transactions and require a fresh Session.
-GET only reads and never commits. Error types are the shared NotFoundError,
-ConflictError, ValidationError and UnavailableError. The router produces shared
-safe envelopes and the JSON attachment is an envelope-free SubmissionPayload.
+Create/export/apply/recovery own short transactions with a fresh Session; reads
+never commit. Shared safe errors/envelopes, generated client and public DTOs are
+retained. New tests use real profile/form public reads after creating version 2
+with a different mapping, then prove export still uses extraction-pinned version
+1 and includes the human purchase-order correction. Only missing review/extraction
+reads are explicit test doubles. This is not a full extraction/review workflow.
 
-New exports call the public `get_confirmed_review`, `get_extraction`,
-`get_profile(session, id, version)` and `get_form` interfaces documented in
-`contracts/internal.md`. No private domain table is accessed. Missing owner
-modules return 503. Missing transitive dependencies or incompatible service
-signatures surface as failures rather than being disguised as successful data.
+Wire schemas, examples and generated TypeScript are unchanged. Contract generation
+preserves file ordering when parsed OpenAPI is equal; any actual schema change
+still writes a new artifact and fails drift checks until coordinated. The runtime
+OpenAPI equality and module request/response compatibility tests still pass.
 
-The server checks exact requested review identity/revision, confirmed status and
-timestamp, ready extraction, profile identity/version, form identity, exact
-warning acknowledgement, exact field/table/cell keys, row uniqueness, unique
-mapping tags, supported value types, option keys and required values. It builds
-payload solely from the confirmed values and versioned mapping. Immutable profile
-versions and form definitions remain owner obligations; integration does not
-reconstruct their private snapshots. Human rows and corrections are preserved.
-Null stays null; false and decimal strings do not become missing values.
+## Database and shared infrastructure
 
-Migration `0501_submissions`, parent `0001_platform`, creates `submissions`, a
-unique idempotency key, immutable request hash/payload and an apply-recovery
-index. Published baseline migrations are unchanged. The model is registered in
-Alembic metadata. No cross-module foreign key is invented while owners' schemas
-are absent. Reconcile additional migration heads after reviewed modules land.
+Registered metadata: platform, integrations and profiles models. Shared Alembic
+version_locations includes backend/migrations/versions and
+backend/app/profiles/migrations, using newline-separated paths. New no-op merge
+revision 0502_profiles_assembly joins 0301_profiles and 0501_submissions. Published
+0001_platform, 0301_profiles and 0501_submissions are unchanged. There is exactly
+one current head. The migration test verifies actual heads, required ancestors,
+all platform/profile/submission tables and transactional enqueue rollback; it
+no longer assumes a bootstrap-only head.
 
-Canonical intent hashing covers every CreateSubmission field. PostgreSQL INSERT
-ON CONFLICT resolves simultaneous identical requests; the winning operation is
-returned. Changed intent with the same key returns 409 and never overwrites the
-winner. Validation and serialization failure leave no partial operation. Existing
-operations can be read/downloaded even when an upstream module is unavailable.
-Downloads lock the operation and move prepared/export mode to exported; repeated
-downloads return the stored payload. Exported means the response was served, not
-that the user saved a file or that eGrant accepted any values.
+Do not create a merge revision referencing absent 0201/0401 yet. Once their
+reviewed modules land, register their owned locations/models and add a new merge
+revision joining them with 0502. Do not rewrite 0502 after publication.
 
-## Worker and external writes
+Pytest uses importlib collection to avoid basename collisions such as module
+files named test_routes.py. The old profile test fixture/harness no longer mounts
+the router a second time: it tests production create_app directly. The browser
+harness checks an egrant_test database name and applies production migrations,
+so a new CI database does not depend on a previous pytest run. The unavailable-
+owner submission test injects an explicit unavailable public read instead of
+assuming an owner package can never be installed.
 
-`submission.apply` explicitly registers `apply_submission`. Document/extraction
-handlers remain explicit unavailable handlers until their reviewed owners'
-implementations are assembled. One queue, lease token, bounded retry and
-transactional enqueue are retained; no second worker infrastructure was added.
+No runtime dependency or lock was changed. Fixtures are test/reference data only.
+The gate remains a single-workspace HttpOnly-cookie demo with Origin checks;
+it is not eGrant identity or tenant isolation. Secrets are server-side. Document
+content and financial values never become logs or frontend bundle configuration.
 
-No application-data API, receipt lookup, current-state reconciliation interface,
-append/replace semantics or authorized eGrant test target is available here.
-Form-structure editing is not an application-value write interface. Credentials
-and acknowledgeOverwrite cannot enable an adapter: POST mode=egrant returns 503
-without creating a submission or job. No external HTTP request is made.
+## Worker recovery, logging and member-2 coordination
 
-The defensive handler fails seeded undispatched eGrant operations and turns
-seeded interrupted applying operations into unknown. Worker polling recovers up
-to 100 operations whose apply job is terminal, using row locks and skip-locked
-selection. It never requeues them. Tests simulate restart by expiring a real
-PostgreSQL job lease, exhausting its one attempt and invoking recovery. These
-are local uncertain-state tests, not remote timeout or reconciliation evidence.
-Applied/receipt transitions remain unavailable; no fake submission.applied event
-is emitted. A future adapter needs atomic operation/outbox creation, explicit
-human authorization, documented semantics and receipt/state reconciliation before
-unknown can become applied or another write can be attempted.
+submission.apply is registered explicitly. Document/extraction handlers remain
+explicit unavailable handlers. One durable queue retains leases, fencing and
+bounded retries. The accepted #5 fix selects one deterministic failed job per
+recoverable submission, locks only submission rows and emits logs after commit
+with the stored requestId/jobId/attempt. Repeat recovery produces no duplicate
+transition. Interrupted applying -> unknown; undispatched terminal work -> failed.
+There is no automatic remote write/retry or fake submission.applied event.
 
-## UI, access and logs
+The JSON logger now permits UUID profileId/formId and numeric version, in addition
+to revision and existing IDs/attempt/duration. Real HTTP profile creation/versioning
+tests capture formatted JSON, check both request IDs and versions and prove names
+are absent. Shared redaction, access and job-correlation tests pass.
 
-`/history` consumes the generated extraction-list API with pagination and polling
-for queued/running results. Empty, unavailable, loading and error states are real;
-no fixture records are inserted into runtime history. `/submissions/:id` shows
-durable status, confirmed revision/profile version, a protected JSON download,
-payload preview and retryable loading/download errors. Unknown warns against
-repeating the write. There is no new apply button. ReviewPage remains owned by
-member 4; its existing PR supplies confirmation/export controls.
+Member 2 supplied the extraction requests in this chat: four shell replacements,
+process_extraction registration, migration heads, terminal-job recovery and
+aiConfigured from OpenAIProvider.from_settings. Shared registrations belong to
+member 5 and need no separate duplicate scaffold/shared-files branch.
 
-Slovak copy, the fixture banner, typography, shared controls and QueryClient are
-retained. The JSON preview scrolls internally on narrow screens. React escapes
-payload text. No payload is written to frontend console output or browser storage.
-The cookie gate, Origin protection and private-file access are retained. This
-remains a single-workspace demo, not eGrant identity or tenant isolation.
+The proposed owner interface is recorded in contracts/internal.md:
 
-Logs use the existing JSON logger and redaction. New persisted operations emit
-submission.prepared with requestId, extractionId, submissionId and durationMs.
-Defensive apply/recovery emit submission.failed or submission.unknown with safe
-codes. Worker handlers inherit requestId/jobId/attempt through ContextVars;
-job completion/retry events retain correlation. Numeric revision is allowed in
-formatted JSON, resolving member 4's shared logger request. Payloads, access
-codes, financial values, filenames and idempotency keys are not logged.
+```python
+# Pending implementation/review in app.extraction.service
+recover_terminal_extractions(session: Session) -> None
+```
 
-## Integration requests and ownership
+Member 2 owns the domain transition; member 5 will call it in the worker polling
+loop using a fresh Session. It must lock a bounded batch with SKIP LOCKED, handle
+queued/running runs with terminal failed jobs, and skip every resource with an
+active queued/running job, especially a newer manual retry. Invalidate run_token,
+mark failed with a safe code, preserve confirmed data and log original correlation
+after commit. Do not reset the attempt budget or silently issue more paid calls.
+Required regressions: final-lease crash, queued after last failed attempt, newer
+retry, ready result, concurrent sweep/retry, late token, repeat sweep and safe logs.
+This interface is pending, not implemented/registered here. Existing manual retry
+is owner behavior. No private extraction table write was added by integration.
 
-At inspection, `main` remains the bootstrap merge. PR #3 has member 4's review
-module at `133e6ced9cbce21fb255fa77b45d3d335c47ec75`, awaiting member 3 review.
-It was inspected as a dependency, not merged or rewritten. Documents, extraction
-and profile PRs were not available. Bootstrap's independent report is in PR #2;
-its reviewed head 70370b3 has the same tree as baseline 88d1b95.
+Lease is 60 seconds, current provider socket timeout 40 seconds. The provider code
+was inspected: a socket timeout alone does not prove an end-to-end deadline across
+body reads, parsing and validation. Member 2 must verify delay behavior before
+claiming the whole handler always fits its lease. No renewal is claimed.
 
-| Owner | Required registration after independent review |
+After independent review, member 5 will register process_extraction and compute
+aiConfigured from the actual configured adapter. Optional separate retry vocabulary
+is deferred; current job.retry_scheduled events remain. The corrected migration
+assertion is on integration; it does not magically make the isolated Draft #6 CI
+green. Member 2 must synchronize the reviewed shared changes or request a scoped
+backport and rerun that exact head. A subsequent module code change needs renewed
+review. No unreviewed module is merged into main to hide a red check.
+
+## Verification on 2026-10-30
+
+All final commands below exited 0. Local Python 3.12.6, uv 0.13.6, Node 26.5.0,
+PostgreSQL 16 and Chromium; Compose frontend uses Node 22.
+
+| Check | Actual result and limit |
 |---|---|
-| 1, documents | Replace document shells with app.documents.routes.router; register document.process public handler; register owned 010* migration location/models |
-| 2, extraction | Replace extraction shells; register extraction.process public handler; expose exact version identity; register 020* migrations/models |
-| 3, profiles | Replace form/profile shells; public versioned get_profile and get_form; register 030* migrations/models |
-| 4, review | Replace three review shells; include app.reviews.routes.router; discover backend/app/reviews/migrations and import models; preserve 0401_reviews; add dedicated review browser command to CI after merge |
-| 5, integration | Merge migration heads through a new revision, regenerate/check schema/client, run assembled checks; route owners fix their own defects |
+| make check | PASS: lock validation, Ruff/format, tracked-secret scan, runtime OpenAPI/generated-client compatibility, strict TypeScript/Vite build |
+| make test | PASS: 123 backend tests = 32 platform + 50 profiles + 41 integration; 26 frontend tests = 1 platform + 25 profiles |
+| Recovery regression subset before accepting #5 | PASS: 8 tests including original request/job/attempt on both terminal states and deterministic selection |
+| Profile/export assembly | PASS: production protected routes, persisted versions, formatted logs, pinned mapping after later edit and exact human correction |
+| make e2e | PASS: 3 foundation Chromium scenarios |
+| make e2e-integration | PASS: 4 submission/history scenarios; explicit neighboring doubles, real submission HTTP/DB/download |
+| make e2e-profiles | PASS: 2 UI-adapter scenarios + 1 real production UI/API/PostgreSQL workflow with invoice/travel forms, versions, reload and narrow layout |
+| Clean local clone | PASS: locked install/check/test/all 10 browser scenarios; no tracked/untracked changes afterward |
+| Empty-volume Compose | PASS: healthy API/DB, worker/frontend running, head 0502_profiles_assembly; real forms/profiles lists empty; provider capabilities all false |
+| Final-head GitHub CI | See PR #4; do not infer a remote result from local checks |
+| Full upload/normalization/extraction/review/draft reload/confirm/export | NOT VERIFIED: review/extraction review gates and unpublished documents block assembly |
+| Live OCR/AI and real eGrant write/timeout/reconciliation | NOT VERIFIED in this integration; no live request or external write performed |
 
-The numeric revision logging request is implemented. Other review registrations
-remain pending its reviewed merge; adding absent import paths now would break
-startup. No frozen wire-contract change is requested by this PR. Any future
-change must update schemas, examples, generated client and affected consumers
-together. External writes still require a separate explicit human confirmation.
+The first profiles-only assembly had duplicate operation-ID warnings because the
+module test harness still mounted a now-registered router. It was corrected to use
+production assembly; final tests have no duplicate warnings. A new browser DB also
+needed its own migration step, now handled by the guarded test server. Remaining
+non-failing warnings: legacy separator configuration in the unchanged owned
+profiles Alembic config, Starlette/httpx deprecation, terminal colors and optional
+host fsevents install-script notice. No warning is hidden as a passing live test.
 
-## Executed verification
-
-All final checks below exited 0 on the code tree identified above. Host tools:
-Python 3.12.6, uv 0.13.6, Node 26.5.0; Compose frontend uses Node 22. PostgreSQL 16
-ran in a dedicated local container, `egrant-integration-test`, port 55435.
-Tests reset only explicitly named disposable test databases.
-
-| Check | Result and boundary |
-|---|---|
-| make check | PASS: locked dependencies, Ruff, formatting, tracked-secret pattern scan, OpenAPI/client drift, strict TypeScript, Vite build |
-| make test | PASS: 67 backend tests (35 integration, 32 platform) and one component test |
-| Real PostgreSQL idempotency | PASS: concurrent same intent, concurrent changed intent, rollback after insert, exact persisted payload and repeated download |
-| Invalid data | PASS: draft/stale/unconfirmed review, wrong extraction/profile, warnings, missing required values, invalid options/types/keys/rows/mappings |
-| Worker safety | PASS: one-attempt apply, expired lease restart, unknown/failed recovery, active lease preservation, request/job correlation |
-| Access/redaction/schema | PASS: protected submission/status/content, safe validation, attachment schema, request IDs and no document values or key markers in logs |
-| Another profile | PASS at payload boundary: renamed target tags, replace export metadata, human row UUIDs, false/null and decimal string values |
-| make e2e | PASS: three Chromium foundation scenarios |
-| make e2e-integration | PASS: four Chromium scenarios; real submission API/database/download, explicit neighboring doubles, responsive status and UI error recovery |
-| Clean-clone install/check/test/both E2E | PASS: new local clone with independent locked installs and clean working tree |
-| Clean-clone Compose | PASS: new volumes; healthy API/DB; worker/frontend running; 0501_submissions; fixture capabilities all false; example submission ID returns 404 |
-| GitHub Actions | See final PR checks; local results do not imply remote CI passed |
-| Full upload -> extraction -> edit -> confirm -> export | NOT VERIFIED: domain services not assembled |
-| Real provider failures / actual eGrant timeout / reconciliation | NOT VERIFIED: no documented adapter or authorized live tests |
-| Independent module/release review | NOT VERIFIED: member 4 and later member 1 must review exact PR/release SHAs |
-
-Earlier runs failed because Docker was stopped, foundation tests still expected
-0001_platform/unregistered apply, the external browser-test path could not resolve
-Playwright, and the mobile JSON preview widened the grid. Docker was started;
-a dedicated test DB was created; assertions were updated for the registered
-service/migration; browser tests moved beside the locked frontend dependency;
-and the grid was fixed. Final tests preserve strong behavior assertions.
-Non-failing warnings: Starlette TestClient/httpx deprecation, whatwg-encoding,
-terminal color flags and host npm allow-scripts for optional fsevents.
-
-### Exact local commands
+Commands in the main checkout:
 
 ```sh
 export UV_CACHE_DIR=/private/tmp/egrant-integration-uv
 make check UV=.tools/bin/uv
 TEST_DATABASE_URL=postgresql+psycopg://egrant:local-test-only@localhost:55435/egrant_test_integration make test UV=.tools/bin/uv
-make e2e
+TEST_DATABASE_URL=postgresql+psycopg://egrant:local-test-only@localhost:55435/egrant_test_integration make e2e
 INTEGRATION_E2E_DATABASE_URL=postgresql+psycopg://egrant:local-test-only@localhost:55435/egrant_test_e2e_integration make e2e-integration
+TEST_DATABASE_URL=postgresql+psycopg://egrant:local-test-only@localhost:55435/egrant_test_profiles_fresh make e2e-profiles
 ```
 
-Clean checkout: `/private/tmp/egrant-integration-verify-3897303`, cloned from the
-local repository at the tested SHA with `git clone --no-hardlinks --branch
-codex/integration`. `make install` used the pinned uv executable at
-`/Users/Andrew/Documents/ChatGPT/FUTURE-MAKERS/future-makers-egrant/.tools/bin/uv`.
-Then the same checks ran there with that absolute UV argument. No source from
-the primary checkout was imported by the clean clone's app/tests. Chromium was
-already installed on the host. Compose used the following commands:
+The dedicated egrant-integration-test container exposes PostgreSQL on 55435;
+test databases were created explicitly. The fresh profile browser DB began with
+no schema and was migrated by its harness. No test used the Compose demo DB.
+Clean clone: /private/tmp/egrant-profiles-verify-dbf2d8c, cloned locally with
+--no-hardlinks at dbf2d8c. make install/check/test used the existing pinned uv
+executable by absolute path; the cloned app imported only its own source and
+independent .venv. All suites were rerun there. Compose used copied .env.example,
+new project egrant-profiles-verify-dbf2d8c, DB_PORT=55437 and new volumes.
 
-```sh
-cp .env.example .env
-DB_PORT=55436 docker compose -p egrant-integration-verify-3897303 up --build -d
-DB_PORT=55436 docker compose -p egrant-integration-verify-3897303 ps
-docker compose -p egrant-integration-verify-3897303 exec -T db psql -U egrant -d egrant -Atc 'SELECT version_num FROM alembic_version'
-curl --fail --silent http://localhost:5173/api/v1/capabilities
-git status --short
-```
+Git CLI previously lacked HTTPS push credentials. Publication uses the connected
+GitHub API with identical tested tree, a non-force expected-SHA update and both
+parents: accepted recovery merge 9d28ff3 and reviewed profiles e845099. Thus module
+history is retained in the published integration commit. Original local commits
+are preserved. The final documentation commit does not change executable code.
 
-Network, Docker and local sockets required sandbox escalation. CLI push lacked
-GitHub HTTPS credentials. The connected GitHub API published the exact tested
-tree as e0e1f95, using baseline as parent and a non-force ref update with the
-expected previous SHA. `git fetch origin codex/integration` followed by
-`git diff --exit-code HEAD origin/codex/integration` exited 0. Original local
-commits were preserved; the connector publication has a different commit identity.
-No other branch was reset, force-pushed or merged.
-
-## Provider matrix and manual demo
+## Provider matrix and manual reproduction
 
 | Capability | Classification |
 |---|---|
-| Cookie gate, storage, durable jobs | Fixture/local verified; no eGrant identity |
-| Confirmed submission and JSON download | Fixture-boundary verified with real PostgreSQL; unavailable for new operations until domain public reads land |
-| OCR/AI/document extraction | Unavailable on this branch |
-| Illustrative form/example payloads | Reference data only; not runtime history |
-| eGrant authentication, application write, receipt reconciliation | Unavailable; no live verification |
+| Form import/profile configuration | Local/fixture verified through real HTTP/PostgreSQL; real eGrant format unavailable |
+| Confirmed export and status | Boundary verified with real persisted submissions/profiles; review/extraction reads are explicit doubles in tests |
+| Source normalization/OCR | Unavailable: documents not published |
+| AI extraction | Unregistered; owner reports synthetic OpenAI runs with gpt-4.1-mini, not rerun/claimed as assembled evidence here |
+| eGrant identity/application writes/current-state/receipt lookup | Unavailable, capability=false; mode=egrant returns 503 without enqueue |
 
-Run `make dev` from a clone using README. Open `/history`: an explicit unavailable
-state is expected until extraction is registered. A random submission ID shows
-a safe load error; it never reveals a reference record from examples.
+Follow README on codex/integration, then open /profiles. Import either JSON in
+ tests/profiles/examples, configure scalar/table destinations, save, edit to v2,
+reload and select v1 to verify immutability. The fixture/illustrative banners stay
+visible. Trial is disabled with an explicit missing-document/extraction message.
+/history reports unavailable rather than inventing records.
 
-For the reproducible submission demonstration, create the disposable E2E DB and
-run `make e2e-integration`. Its test-only server supplies reference review/profile
-reads. The browser creates a real operation, downloads JSON, verifies the human
-correction, repeats the same key and rejects changed intent. The screenshot
-`docs/release/integration-export.png` is an ignored local/CI artifact. This demo
-must be described as submission-boundary evidence, not an assembled product.
+Use make e2e-integration to demonstrate persisted JSON download with exact human
+corrections. Use make e2e-profiles to demonstrate two distinct real form/profile
+configurations. The adapter browser scenario and boundary probes must be labeled
+as such. The second one is not a document-to-export demo.
 
-After owners land, the user-facing demo is: import a form, configure a profile,
-upload a permitted file, inspect evidence, correct a value/row, save and reload
-the draft, acknowledge warnings, confirm, prepare export, download JSON and
-compare the correction. Repeat with another profile and show stale-revision,
-duplicate-document and provider-failure states. eGrant apply remains disabled
-until the documented interface and separately authorized test write are supplied.
+Full demo remains gated: real upload -> normalized evidence -> pinned extraction
+-> source/field/table review -> save/reload -> explicit confirmation -> JSON
+containing the human correction. Then exercise another profile, missing values,
+provider failure, duplicates, stale revisions and repeated intent. Actual eGrant
+apply additionally needs documented application-data semantics, authorized test
+target, known-state overwrite safeguards and explicit human confirmation.
 
-## Self-review and release checklist
+## Final review and release gates
 
-Applied human-code and final-review to the baseline-to-code diff, new files,
-surrounding routes, queue, DTOs, migrations, callers and tests. Applied humanizer
-in technical voice to this handoff and README, preserving facts and commands.
-Fixed unused frontend imports, mobile overflow, migration/handler test assumptions
-and recovery query indexing. Confirmed no example loader is imported by runtime,
-no private cross-module table reads, no schema/client drift, no new runtime
-package, no fake provider success and no external write path. Backend reliability
-review for e0e1f95 passes the implemented export boundary with the dependency and
-live-write limits recorded above. Independent review is still required.
+Applied human-code, backend-reliability-review and final-review to the actual
+baseline-to-assembly diff, public interfaces, queue, migrations, tests and UI.
+Inspected profiles' existing implementation and unchanged runtime source against
+its exact-head independent report. Fixed shared registrations, duplicate harness
+mounting, schema-order churn, migration discovery/head assertions, test collection
+mode and new-DB browser startup. Inspected desktop/mobile test captures. Applied
+humanizer only to technical documentation, preserving code/commands/evidence.
 
-Release criteria from `07-RELEASE-REVIEW.md` for this code SHA:
+For a00989b: no unresolved in-scope defect was found in the registered profiles /
+submission boundary after those fixes and checks. This is author self-review;
+member 4 must independently review the new complete PR #4 head. The earlier
+0816377 CHANGES REQUIRED remains historical, with its recovery finding resolved
+by accepted #5. No PASS for the newly assembled release is claimed.
 
-- [x] Empty-database startup, migrations and reproducible locked checks.
-- [x] Confirmed-payload boundary, concurrency, safe errors, access and redaction.
-- [x] Narrow-screen status/download behavior and genuine unavailable states.
-- [ ] Members 1–4 independently reviewed, merged through main and registered.
-- [ ] Migration heads reconciled without editing published history.
-- [ ] Full real module fixture workflow, draft reload and human corrections in export.
-- [ ] Assembled duplicate/provider/revision-conflict and another-profile browser flows.
-- [ ] Permitted real documents, OCR/AI credentials and data-handling approvals.
-- [ ] Documented eGrant application write/current-state/receipt semantics and authorized target.
-- [ ] Explicit human permission for any live application write.
-- [ ] Independent member-4 integration review, then member-1 release review on final main SHA.
-
-Evaluation procedure: `docs/team/07-RELEASE-REVIEW.md`; module review procedure:
-`docs/team/06-PEER-REVIEW.md`; bootstrap evidence: `docs/release/BOOTSTRAP-REVIEW.md`
-and PR #2. No challenge evaluation endpoint or submission channel is supplied.
-The team must provide the exact October 30 submission time/timezone/channel.
-Do not label this branch a completed assembled hackathon release.
+Release procedure is docs/team/07-RELEASE-REVIEW.md. Member 1 performs it on the
+exact final main SHA only after modules are independently reviewed, assembled,
+heads reconciled and the full workflow verified. There is no final assembled main
+SHA to review yet. Member 4 remains the requested integration reviewer; source
+review/extraction owners must obtain member 3/member 1 verdicts respectively.
+No new chat, deployment, final main merge or live application write was created.
