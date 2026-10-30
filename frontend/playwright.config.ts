@@ -10,7 +10,7 @@ const python = path.resolve(
 
 export default defineConfig({
   testDir: "./tests/e2e",
-  testIgnore: "integration.spec.ts",
+  testIgnore: ["integration.spec.ts", "full-product.spec.ts"],
   use: { baseURL: "http://localhost:5174", browserName: "chromium" },
   webServer: [
     {

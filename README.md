@@ -3,7 +3,14 @@
 Document-to-form extraction with mandatory human review.
 Repository: https://github.com/andr1chkol/future-makers-egrant.
 
-On `codex/documents-integration`, private document intake and immutable normalized
+The active integration continuation is `codex/final-assembly`, owned by member 3
+after member 5's handover. It preserves PR #11 at
+`6d3843d43f00424601bd94dd0bba263bd9f6a728`; its verified code ancestor is
+`a5b283f129cf9caed7097d75d71ed0fbd365618a`. The complete product remains blocked
+on the human-review and extraction review gates. See
+[the continuation status](docs/release/FINAL-ASSEMBLY-STATUS.md).
+
+Private document intake and immutable normalized
 sources are connected to the shared API and worker. The profiles module supports illustrative form
 import, mapping configuration and immutable profile versions. Confirmed submission
 persistence, idempotent JSON export, history/status pages and recovery logging are
@@ -26,7 +33,7 @@ with npm. Docker runs the application; host Python/Node are for checks and tests
 ```sh
 git clone https://github.com/andr1chkol/future-makers-egrant.git
 cd future-makers-egrant
-git switch codex/documents-integration
+git switch codex/final-assembly
 cp .env.example .env
 make dev
 ```
@@ -213,3 +220,23 @@ make e2e-documents
 See docs/release/DOCUMENTS-ASSEMBLY.md for exact verification and the extraction
 fixture compatibility blocker. Separate review links are preserved for separate
 documents. No unconfirmed data is exported or applied.
+
+## Complete-product acceptance demo
+
+After the locked install and Chromium installation, create disposable PostgreSQL
+databases `egrant_test_full_product` and `egrant_test_full_product_e2e`. Set
+`TEST_DATABASE_URL` and `FULL_PRODUCT_E2E_DATABASE_URL` to their connection URLs,
+then run `scripts/final-assembly-demo.sh`. The backend test resets the supplied
+`egrant_test` database; the browser launcher resets only the exact
+`egrant_test_full_product_e2e` database. Never point these commands at demo data.
+
+The script uses the production routes, worker, private storage and real file
+normalization in visibly labeled fixture mode. It stops at the first failure.
+On the current continuation it fails at extraction with `503 FEATURE_UNAVAILABLE`.
+The later human edit, confirmation and exact scalar/table export assertions are
+prepared but have not passed. No neighboring service doubles make this a success.
+`make e2e-full-product` runs the browser portion separately; `make test` includes
+the backend acceptance cases and currently fails at the same missing module.
+
+See [the reproducible demo procedure](docs/release/FINAL-ASSEMBLY-DEMO.md) for
+required review gates, expected results and provider limits.

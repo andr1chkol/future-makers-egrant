@@ -1,5 +1,5 @@
 UV ?= uv
-.PHONY: dev install check test e2e generate migrate e2e-integration e2e-profiles
+.PHONY: dev install check test e2e generate migrate e2e-integration e2e-profiles e2e-documents e2e-full-product
 install:
 	$(UV) sync --locked
 	cd frontend && npm ci
@@ -33,3 +33,6 @@ e2e-profiles:
 
 e2e-documents:
 	frontend/node_modules/.bin/playwright test --config tests/documents/playwright.config.cjs
+
+e2e-full-product:
+	cd frontend && npx playwright test --config playwright.full-product.config.ts

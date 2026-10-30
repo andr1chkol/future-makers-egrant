@@ -1,3 +1,15 @@
+# Member 3 continuation
+
+The sole active integration branch is `codex/final-assembly`, transferred from
+member 5 and based on PR #11 at `6d3843d43f00424601bd94dd0bba263bd9f6a728`.
+[FINAL-ASSEMBLY-STATUS.md](FINAL-ASSEMBLY-STATUS.md) records current review gates,
+actual checks, provider availability and remaining delivery work.
+[FINAL-ASSEMBLY-DEMO.md](FINAL-ASSEMBLY-DEMO.md) and
+`scripts/final-assembly-demo.sh` reproduce the real failing acceptance flow.
+The current extraction shell returns 503 after actual file normalization. The
+complete product remains NOT READY. Historical evidence below retains its
+original scope and does not describe a successful final assembly.
+
 # Documents assembly follow-up
 
 Current document assembly and verification: [DOCUMENTS-ASSEMBLY.md](DOCUMENTS-ASSEMBLY.md).

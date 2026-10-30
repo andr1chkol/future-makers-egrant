@@ -6,6 +6,7 @@ import pytest
 from app.platform.database import session_factory
 from app.platform.settings import get_settings
 from sqlalchemy import create_engine, text
+from sqlalchemy.engine import make_url
 from sqlalchemy.orm import sessionmaker
 
 
@@ -22,13 +23,28 @@ def fixture_settings(monkeypatch):
     session_factory.cache_clear()
 
 
+def validate_test_database_url(url):
+    parsed = make_url(url)
+    # Driver query parameters can override the database named in the URL path.
+    if (
+        parsed.get_backend_name() != "postgresql"
+        or parsed.query
+        or not (parsed.database or "").startswith("egrant_test")
+    ):
+        raise ValueError(
+            "An isolated PostgreSQL egrant_test database without URL query is required"
+        )
+
+
 @pytest.fixture
 def database(monkeypatch):
     url = os.environ.get("TEST_DATABASE_URL")
     if not url:
         pytest.fail("TEST_DATABASE_URL must point to an isolated PostgreSQL database")
-    if not url.rsplit("/", 1)[-1].startswith("egrant_test"):
-        pytest.fail("Refusing to reset a database without egrant_test name prefix")
+    try:
+        validate_test_database_url(url)
+    except ValueError as error:
+        pytest.fail(str(error))
     monkeypatch.setenv("DATABASE_URL", url)
     get_settings.cache_clear()
     engine = create_engine(url, hide_parameters=True)
