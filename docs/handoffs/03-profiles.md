@@ -3,8 +3,9 @@
 Repository: https://github.com/andr1chkol/future-makers-egrant.
 Branch: `codex/profiles`. Target: `main` (`BASE_BRANCH`).
 Verified baseline: `bootstrap-v1`, `88d1b959c524cfd559d01ee8ff6ac3f183f7c9e8`.
-Reviewed implementation commit: `5b1d3dfcc36005e478a5802a539cfb43530607f8`.
-The final handoff commit changes documentation only.
+Original implementation review commit: `5b1d3dfcc36005e478a5802a539cfb43530607f8`.
+The original handoff commit changes documentation only. See the publication
+review below for the subsequent independent-review fix and fresh verification.
 
 This is the author's implementation handoff. Member 2 must independently review
 the final PR head in a fresh chat using `docs/team/06-PEER-REVIEW.md`. Supplemental
@@ -204,7 +205,7 @@ warnings remain visible. No dark-mode or screen-reader audit is claimed.
    the saved version. Verify navigation to the shared review route. In the
    baseline harness, verify a visible unavailable error and disabled trial instead.
 
-## Review and publication
+## Original review and publication
 
 Applied human-code to implementation, humanizer to technical prose and final-review
 to actual changes and surrounding code. Supplemental specification, Python,
@@ -216,12 +217,12 @@ queries are cancelled before caching the authoritative imported form.
 Shared contracts and locks have no diff. Actual OCR/AI/eGrant and the assembled
 extraction worker remain unverified.
 
-GitHub CLI has no authenticated account. HTTPS push credentials are absent, but
-the existing SSH key authenticates as dimaua12 and an SSH push dry-run confirms
-write access. Publication uses that authorized SSH transport. Creating a PR still
-requires GitHub API authentication; no remote PR is claimed. Browser fallback
-was rejected by automatic tool approval with `approval policy: never`.
-After GitHub authentication:
+During the original publication attempt, GitHub CLI had no authenticated account.
+HTTPS push credentials were absent, but the existing SSH key authenticated as
+dimaua12 and an SSH push dry-run confirmed write access. Publication used that
+authorized SSH transport. Creating a PR required GitHub API authentication; no
+remote PR was created in that attempt. Browser fallback was rejected by automatic
+tool approval with `approval policy: never`. The original recovery commands were:
 
 ```sh
 cd /Users/dima/future-makers-egrant-profiles
@@ -233,3 +234,44 @@ gh pr create --repo andr1chkol/future-makers-egrant --base main --head codex/pro
 
 Do not force-push or merge automatically. Give member 2 the resulting PR URL and
 exact final head SHA for the fresh-chat review.
+
+## Publication review on 2026-10-30
+
+The published source was clean and synchronized at
+7fe76595cb82475eb0350bc3045433705319c8f9. The actual main-to-profiles diff was
+reviewed with the local final-review skill; it contains only the owned module,
+tests and handoff. No temporary production assembly, shared contract, lockfile or
+unrelated code is included. The test-only browser_app.py remains intentional
+verification infrastructure, not a production registration.
+
+Member 2's report at review/profiles-7fe7659, commit
+e0f6e92, gives CHANGES REQUIRED for the old head because the integration browser
+test wrote screenshots to /private/tmp, a macOS-only path. Only the reviewer's
+test portability patch fc49db8 was cherry-picked, as
+44cc3b848c3e6f5ed9f30acc7cb681802262c33a. Screenshots use
+testInfo.outputPath(...) in Playwright's per-test artifact directory. Runtime
+application code is unchanged. No review-branch assembly experiments or other
+changes were imported.
+
+Fresh checks after the fix passed: make check (exit 0), make test (82 backend and
+26 frontend tests, exit 0), the three foundation browser tests, the two mocked
+profile browser scenarios, and the one real UI/API/PostgreSQL browser workflow.
+The latter starts after pytest leaves the migrated profile tables empty.
+Commands, tool overrides, fixture boundaries and PostgreSQL setup are documented
+above. This publication pass ran on macOS; member 2's reported Linux results are
+independent evidence and are not claimed as a fresh Linux run here.
+
+The handoff's form preservation, mapping validation, immutable versions, public
+get_form/get_profile signatures, trial handoff and member 5 registration requests
+match the implementation. Real eGrant exports, live providers, and the complete
+assembled document-to-export flow remain unverified. Logging ID/version output
+still requires the shared formatter allowlist change.
+
+Nonblocking peer-review follow-ups remain: profile list order uses stable random
+UUIDs rather than names, and imported option keys preserve surrounding whitespace.
+No option values were silently trimmed or otherwise rewritten during publication.
+
+The portability correction is ready for member 2 to recheck at the final PR
+head using docs/team/06-PEER-REVIEW.md in a fresh chat. The old CHANGES REQUIRED
+verdict is not represented as approval of the new head. No approval, review
+comment, merge or bootstrap tag change is authorized by this publication pass.
