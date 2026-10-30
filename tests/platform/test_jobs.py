@@ -1,16 +1,28 @@
 from datetime import timedelta
 from uuid import uuid4
 
+from alembic.config import Config
+from alembic.script import ScriptDirectory
 from app.platform.jobs import JobPayload, JobRegistry, claim, enqueue, run_once
 from app.platform.logging import request_id
 from app.platform.models import Job
 from app.worker import build_registry
-from sqlalchemy import func, select, text, update
+from sqlalchemy import func, inspect, select, text, update
 
 
 def test_migration_and_transactional_enqueue(database):
     with database() as session:
-        assert session.scalar(text("SELECT version_num FROM alembic_version")) == "0001_platform"
+        migrations = ScriptDirectory.from_config(Config("backend/alembic.ini"))
+        assert set(session.scalars(text("SELECT version_num FROM alembic_version"))) == set(
+            migrations.get_heads()
+        )
+        assert len(migrations.get_heads()) == 1
+        assert {"0001_platform", "0201_extractions"} <= {
+            revision.revision for revision in migrations.walk_revisions()
+        }
+        assert {"platform_jobs", "platform_sessions", "extractions"} <= set(
+            inspect(session.bind).get_table_names()
+        )
         assert session.scalar(text("SHOW server_version")).startswith("16.")
         enqueue(session, "document.process", JobPayload(resource_id=uuid4()))
         session.rollback()

@@ -1,0 +1,224 @@
+{
+  "name": "bank-statement-xlsx",
+  "profile": "bank-statement",
+  "options": {},
+  "document": {
+    "documentId": "00000000-0000-4000-8000-0000000000d4",
+    "units": [
+      {
+        "id": "r1",
+        "text": "Výpis z účtu | Majiteľ: Jana Nováková | IBAN: SK31 1200 0000 1987 4263 7541",
+        "page": null,
+        "sheet": "Výpis",
+        "cell": "A1:C1"
+      },
+      {
+        "id": "r2",
+        "text": "Dátum výpisu: 31.10.2026 | Počiatočný zostatok: 1 250,00 EUR",
+        "page": null,
+        "sheet": "Výpis",
+        "cell": "A2:C2"
+      },
+      {
+        "id": "r3",
+        "text": "02.10.2026 | Nájomné október | -650,00",
+        "page": null,
+        "sheet": "Výpis",
+        "cell": "A3:C3"
+      },
+      {
+        "id": "r4",
+        "text": "15.10.2026 | Grant – záloha | 2 000,00",
+        "page": null,
+        "sheet": "Výpis",
+        "cell": "A4:C4"
+      },
+      {
+        "id": "r5",
+        "text": "28.10.2026 | Energie | -84,35",
+        "page": null,
+        "sheet": "Výpis",
+        "cell": "A5:C5"
+      },
+      {
+        "id": "r6",
+        "text": "Konečný zostatok: 2 515,65 EUR",
+        "page": null,
+        "sheet": "Výpis",
+        "cell": "A6:C6"
+      }
+    ]
+  },
+  "expected": {
+    "fields": {
+      "account_holder": "Jana Nováková",
+      "iban": "SK31 1200 0000 1987 4263 7541",
+      "statement_date": "2026-10-31",
+      "opening_balance": {
+        "amount": "1250.00",
+        "currency": "EUR"
+      },
+      "closing_balance": {
+        "amount": "2515.65",
+        "currency": "EUR"
+      }
+    },
+    "tables": {
+      "transactions": [
+        {
+          "booking_date": "2026-10-02",
+          "description": "Nájomné október",
+          "amount": {
+            "amount": "-650.00",
+            "currency": "EUR"
+          }
+        },
+        {
+          "booking_date": "2026-10-15",
+          "description": "Grant – záloha",
+          "amount": {
+            "amount": "2000.00",
+            "currency": "EUR"
+          }
+        },
+        {
+          "booking_date": "2026-10-28",
+          "description": "Energie",
+          "amount": {
+            "amount": "-84.35",
+            "currency": "EUR"
+          }
+        }
+      ]
+    }
+  },
+  "recordedReply": {
+    "fields": {
+      "account_holder": {
+        "value": "Jana Nováková",
+        "evidence": [
+          {
+            "unitId": "r1",
+            "quote": "Jana Nováková"
+          }
+        ]
+      },
+      "iban": {
+        "value": "SK31 1200 0000 1987 4263 7541",
+        "evidence": [
+          {
+            "unitId": "r1",
+            "quote": "SK31 1200 0000 1987 4263 7541"
+          }
+        ]
+      },
+      "statement_date": {
+        "value": "31.10.2026",
+        "evidence": [
+          {
+            "unitId": "r2",
+            "quote": "31.10.2026"
+          }
+        ]
+      },
+      "opening_balance": {
+        "value": {
+          "amount": "1 250,00",
+          "currency": "EUR"
+        },
+        "evidence": [
+          {
+            "unitId": "r2",
+            "quote": "1 250,00"
+          }
+        ]
+      },
+      "closing_balance": {
+        "value": {
+          "amount": "2 515,65",
+          "currency": "EUR"
+        },
+        "evidence": [
+          {
+            "unitId": "r6",
+            "quote": "2 515,65"
+          }
+        ]
+      }
+    },
+    "tables": {
+      "transactions": {
+        "rows": [
+          {
+            "cells": {
+              "booking_date": {
+                "value": "02.10.2026",
+                "evidence": [
+                  {
+                    "unitId": "r3",
+                    "quote": "02.10.2026"
+                  }
+                ]
+              },
+              "description": {
+                "value": "Nájomné október",
+                "evidence": [
+                  {
+                    "unitId": "r3",
+                    "quote": "Nájomné október"
+                  }
+                ]
+              },
+              "amount": {
+                "value": {
+                  "amount": "-650,00",
+                  "currency": "EUR"
+                },
+                "evidence": [
+                  {
+                    "unitId": "r3",
+                    "quote": "-650,00"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "cells": {
+              "booking_date": {
+                "value": "15.10.2026",
+                "evidence": [
+                  {
+                    "unitId": "r4",
+                    "quote": "15.10.2026"
+                  }
+                ]
+              },
+              "description": {
+                "value": "Grant – záloha",
+                "evidence": [
+                  {
+                    "unitId": "r4",
+                    "quote": "Grant – záloha"
+                  }
+                ]
+              },
+              "amount": {
+                "value": {
+                  "amount": "2 000,00",
+                  "currency": "EUR"
+                },
+                "evidence": [
+                  {
+                    "unitId": "r4",
+                    "quote": "2 000,00"
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

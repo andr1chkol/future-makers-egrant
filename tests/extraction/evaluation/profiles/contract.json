@@ -1,0 +1,107 @@
+{
+  "id": "00000000-0000-4000-8000-0000000000a4",
+  "version": 1,
+  "name": "Zmluva",
+  "documentKind": "contract",
+  "formId": "00000000-0000-4000-8000-0000000000f1",
+  "scalarFields": [
+    {
+      "key": "contract_number",
+      "label": "Číslo zmluvy",
+      "type": "string",
+      "description": "Contract number",
+      "required": true,
+      "targetTag": "contract_number"
+    },
+    {
+      "key": "client",
+      "label": "Objednávateľ",
+      "type": "string",
+      "description": "Name of the ordering party (client, Objednávateľ)",
+      "required": true,
+      "targetTag": "client"
+    },
+    {
+      "key": "contractor",
+      "label": "Zhotoviteľ",
+      "type": "string",
+      "description": "Name of the contractor (Zhotoviteľ)",
+      "required": true,
+      "targetTag": "contractor"
+    },
+    {
+      "key": "signed_date",
+      "label": "Dátum podpisu",
+      "type": "date",
+      "description": "Date the contract was signed",
+      "required": true,
+      "targetTag": "signed_date"
+    },
+    {
+      "key": "start_date",
+      "label": "Začiatok",
+      "type": "date",
+      "description": "Start of performance",
+      "required": true,
+      "targetTag": "start_date"
+    },
+    {
+      "key": "end_date",
+      "label": "Koniec",
+      "type": "date",
+      "description": "End of performance",
+      "required": false,
+      "targetTag": "end_date"
+    },
+    {
+      "key": "contract_value",
+      "label": "Cena",
+      "type": "money",
+      "description": "Contract price as stated",
+      "required": true,
+      "targetTag": "contract_value"
+    },
+    {
+      "key": "contract_type",
+      "label": "Typ zmluvy",
+      "type": "string",
+      "description": "Kind of contract",
+      "required": true,
+      "targetTag": "contract_type"
+    }
+  ],
+  "tableFields": [
+    {
+      "key": "milestones",
+      "label": "Etapy",
+      "targetTag": "milestones",
+      "writeMode": "append",
+      "columns": [
+        {
+          "key": "description",
+          "label": "Popis",
+          "type": "string",
+          "description": "Milestone description",
+          "required": true,
+          "targetTag": "description"
+        },
+        {
+          "key": "due_date",
+          "label": "Termín",
+          "type": "date",
+          "description": "Milestone deadline",
+          "required": true,
+          "targetTag": "due_date"
+        },
+        {
+          "key": "amount",
+          "label": "Suma",
+          "type": "money",
+          "description": "Milestone price",
+          "required": true,
+          "targetTag": "amount"
+        }
+      ]
+    }
+  ]
+}
