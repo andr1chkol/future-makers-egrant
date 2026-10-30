@@ -74,8 +74,10 @@ process_extraction(session, id: UUID, provider: ExtractionProvider | None = None
   Errors: duplicate IDs → 422 `VALIDATION_ERROR`; unknown profile, version or
   document → 404; document not ready → 409; live mode without `OPENAI_API_KEY`
   and `OPENAI_MODEL` → 503 `AI_NOT_CONFIGURED`.
-- `retry_extraction` accepts failed runs only (otherwise 409). It keeps the same ID and
-  enqueues a new job. A failed run never had a result, so no review can exist for it.
+- `retry_extraction` accepts failed runs and stale runs: `queued` or `running` and not
+  updated for `STALE_AFTER` (5 minutes, longer than three 60-second leases plus backoff).
+  Anything else is 409. It keeps the same ID, resets `attempt` and `run_token`, and
+  enqueues a new job. None of these runs had a result, so no review can exist for it.
 - `process_extraction` is the job handler. The other modules are imported at call
   time (`service.load_normalized/load_profile/load_form`), so this branch works
   before they are merged and tests can replace them.
@@ -205,8 +207,8 @@ Against PostgreSQL 16 (`docker.io/library/postgres:16` under podman) with
 
 | Command | Result |
 |---|---|
-| `uv run pytest tests/extraction` | 124 passed, 1 skipped (live test, not enabled) |
-| `uv run pytest` | 155 passed, 1 skipped, **1 failed**: `test_migration_and_transactional_enqueue` (request 3) |
+| `uv run pytest tests/extraction` | 129 passed, 1 skipped (live test, not enabled) |
+| `uv run pytest` | 160 passed, 1 skipped, **1 failed**: `test_migration_and_transactional_enqueue` (request 3) |
 | `uv run ruff check backend scripts tests` | passed |
 | `uv run ruff format --check backend scripts tests` | passed |
 | `uv lock --check` | passed |
@@ -221,22 +223,25 @@ or `uv run pytest tests/extraction/test_lifecycle.py -k worker_produces`.
 
 ## Limits and known risks
 
-- **A crash on the last attempt leaves the run `running`.** If the worker dies
-  during attempt 3, the platform marks the job `LEASE_EXHAUSTED` without calling
-  the handler, and the row stays `running` with no way to retry it through the API. A
-  platform failure hook or a periodic sweep (member 5) would fix this.
+- **Runs can be left `running` or `queued` without a job; they recover only by a
+  manual retry.** If the worker dies during attempt 3, the platform marks the job
+  `LEASE_EXHAUSTED` without calling the handler, and the run stays `running`. If a
+  claim transaction rolls back (for example a database error while loading the
+  document) or the worker dies between claiming the job and claiming the run, the
+  job's attempt count runs ahead of the run's; on the job's last attempt the handler
+  still raises `ExtractionRetryScheduled`, the platform fails the job, and the run
+  stays `queued`. After `STALE_AFTER` both can be retried through
+  `POST /extractions/{id}/retries`, and the old job cannot overwrite the new attempt
+  (tested). Nothing retries them automatically: a platform failure hook or a periodic
+  sweep (member 5) would close the gap without a user action. A run waiting more than
+  five minutes in a long job queue also counts as stale; retrying it only adds a
+  second job, and whichever finishes second skips the finished run.
 - Rate limits use the platform backoff (2 s, 4 s) and ignore `Retry-After`. A
   sustained 429 exhausts the three attempts quickly; the user can retry later.
 - If the model returns ISO dates instead of the printed form, the value is
   still read but marked `needs_review` (`VALUE_NOT_IN_EVIDENCE`).
 - Space-grouped numbers are not checked for continuation: `600,00` is accepted as
   evidence inside `48 600,00`, because table columns are also separated by single spaces.
-- **A run can also stay `queued` without a job.** Extraction counts its own attempts.
-  If a claim transaction rolls back (for example a database error while loading the
-  document) or the worker dies between claiming the job and claiming the run, the
-  job's attempt count runs ahead. On the job's last attempt the handler then still
-  raises `ExtractionRetryScheduled`, the platform fails the job, and the run stays
-  `queued`. The same platform failure hook or sweep as for `running` closes it.
 - Arithmetic checks depend on the conventional keys listed above. A `role` in the
   profile contract would make this explicit.
 - A document over 200,000 characters is rejected rather than split.

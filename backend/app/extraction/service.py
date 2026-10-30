@@ -8,6 +8,7 @@ token replaced and discards its result instead of overwriting a newer run.
 
 import logging
 import time
+from datetime import timedelta
 from uuid import UUID, uuid4
 
 from sqlalchemy import func, select, update
@@ -44,6 +45,11 @@ from app.platform.settings import get_settings
 
 # Matches the platform's attempt limit for extraction.process jobs.
 MAX_ATTEMPTS = 3
+# Three 60-second leases plus the 2 s and 4 s backoffs take a little over three
+# minutes. A queued or running run untouched for longer has lost its job: the
+# worker died on the last attempt, or a rolled-back claim let the job's attempt
+# count run ahead of the run's. Such runs may be retried like failed ones.
+STALE_AFTER = timedelta(minutes=5)
 
 FAILURE_MESSAGES = {
     "AI_TIMEOUT": "The AI provider did not answer in time",
@@ -185,20 +191,26 @@ def list_extractions(session: Session, limit: int, offset: int) -> tuple[list[Ex
 
 
 def retry_extraction(session: Session, id: UUID) -> Extraction:
-    """Queue a failed extraction again under the same ID.
+    """Queue a failed or stale extraction again under the same ID.
 
-    Only failed runs qualify. A failed run never produced a result, so no review
-    can exist for it and nothing a person entered is lost.
+    Failed runs and runs left queued or running past STALE_AFTER qualify. None
+    of them produced a result, so no review can exist and nothing a person
+    entered is lost. If the old job does come back, the run token keeps it from
+    overwriting the new attempt, and a finished run makes later jobs no-ops.
     """
     with session.begin():
         record = session.get(ExtractionRecord, id, with_for_update=True)
         if record is None:
             raise NotFoundError()
-        if record.status != "failed":
+        stale = record.status in {"queued", "running"} and record.updated_at < session.scalar(
+            select(func.now() - STALE_AFTER)
+        )
+        if record.status != "failed" and not stale:
             raise ConflictError()
         if provider_for(record.mode) is None:
             raise AINotConfiguredError()
         record.status, record.attempt, record.error = "queued", 0, None
+        record.run_token = None
         enqueue(session, "extraction.process", JobPayload(resource_id=record.id))
         session.flush()
         session.refresh(record)

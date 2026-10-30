@@ -1,3 +1,4 @@
+import json
 import threading
 from datetime import timedelta
 from uuid import UUID, uuid4
@@ -8,6 +9,7 @@ from app.extraction.models import ExtractionRecord
 from app.extraction.providers import ProviderError
 from app.extraction.routes import router
 from app.extraction.service import (
+    MAX_ATTEMPTS,
     ExtractionRetryScheduled,
     create_extractions,
     get_extraction,
@@ -345,6 +347,77 @@ def test_retry_keeps_the_id_and_only_applies_to_failed_runs(database, modules):
         retry_extraction(session, queued.id)
     with database() as session, pytest.raises(NotFoundError):
         retry_extraction(session, uuid4())
+
+
+def age_run(database, id, status, minutes=6):
+    """Leave a run as a dead worker would: untouched in a non-final state."""
+    with database.begin() as session:
+        now = session.scalar(select(func.now()))
+        session.execute(
+            update(ExtractionRecord)
+            .where(ExtractionRecord.id == id)
+            .values(
+                status=status,
+                run_token=uuid4() if status == "running" else None,
+                attempt=MAX_ATTEMPTS,
+                updated_at=now - timedelta(minutes=minutes),
+            )
+        )
+        # The platform has given up on the job, so nothing will pick the run up again.
+        session.execute(update(Job).values(status="failed", error_code="LEASE_EXHAUSTED"))
+
+
+@pytest.mark.parametrize("status", ["running", "queued"])
+def test_stale_runs_without_a_job_can_be_retried(database, modules, status):
+    (queued,) = create(database)
+    age_run(database, queued.id, status)
+    with database() as session:
+        retried = retry_extraction(session, queued.id)
+    assert (retried.id, retried.status, retried.error) == (queued.id, "queued", None)
+    with database() as session:
+        record = session.get(ExtractionRecord, queued.id)
+        assert (record.attempt, record.run_token) == (0, None)
+    assert run_once(database, worker(ScriptedProvider(good_reply())))
+    assert read(database, queued.id).status == "ready"
+
+
+@pytest.mark.parametrize("status", ["running", "queued"])
+def test_recent_unfinished_runs_cannot_be_retried(database, modules, status):
+    (queued,) = create(database)
+    age_run(database, queued.id, status, minutes=1)
+    with database() as session, pytest.raises(ConflictError):
+        retry_extraction(session, queued.id)
+
+
+def test_old_worker_cannot_overwrite_a_retried_stale_run(database, modules):
+    (queued,) = create(database)
+    old_worker_claimed = threading.Event()
+    release_old_worker = threading.Event()
+
+    class SlowProvider(ScriptedProvider):
+        def extract(self, profile, options, document):
+            old_worker_claimed.set()
+            release_old_worker.wait(timeout=10)
+            return json.dumps(good_reply(total="99.00"))
+
+    old = threading.Thread(target=process, args=(database, queued.id, SlowProvider()))
+    old.start()
+    assert old_worker_claimed.wait(timeout=10)
+    with database.begin() as session:
+        session.execute(
+            update(ExtractionRecord)
+            .where(ExtractionRecord.id == queued.id)
+            .values(updated_at=func.now() - timedelta(minutes=6))
+        )
+    with database() as session:
+        retry_extraction(session, queued.id)
+    process(database, queued.id, ScriptedProvider(good_reply()))
+    release_old_worker.set()
+    old.join(timeout=10)
+    ready = read(database, queued.id)
+    assert ready.status == "ready"
+    total = next(field for field in ready.fields if field.key == "total")
+    assert total.value.amount == "55.00"
 
 
 def assembled_app():
