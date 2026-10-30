@@ -302,3 +302,40 @@ def test_required_whitespace_and_warning_duplicates(
     corrected_snapshot["fields"][0]["value"] = "Human invoice"
     save(review_database, draft.extraction_id, 1, corrected_snapshot)
     assert confirm(review_database, draft.extraction_id, 2).status == "confirmed"
+
+
+def test_confirmed_wire_result_stays_identical_in_non_utc_database_session(
+    review_database, review_context, corrected_snapshot
+):
+    from datetime import timedelta
+
+    from sqlalchemy.orm import Session
+
+    with review_database.kw["bind"].connect() as connection:
+        connection.exec_driver_sql("SET TIME ZONE 'Europe/Bratislava'")
+        connection.commit()
+        try:
+            with Session(bind=connection, expire_on_commit=False) as session:
+                service.get_review(session, review_context[0].id)
+                service.save_review(
+                    session,
+                    review_context[0].id,
+                    SaveReview(expectedRevision=0, **corrected_snapshot),
+                )
+                first = service.confirm_review(
+                    session, review_context[0].id, ConfirmReview(expectedRevision=1)
+                )
+            with Session(bind=connection, expire_on_commit=False) as session:
+                repeated = service.confirm_review(
+                    session, review_context[0].id, ConfirmReview(expectedRevision=2)
+                )
+                assert repeated.confirmed_at.utcoffset() == timedelta(0)
+                assert repeated.model_dump(mode="json") == first.model_dump(mode="json")
+            with Session(bind=connection) as session:
+                reloaded = service.get_review(session, review_context[0].id)
+                consumed = service.get_confirmed_review(session, review_context[0].id, 2)
+                assert reloaded.model_dump(mode="json") == first.model_dump(mode="json")
+                assert consumed.model_dump(mode="json") == first.model_dump(mode="json")
+        finally:
+            connection.exec_driver_sql("RESET TIME ZONE")
+            connection.commit()

@@ -27,7 +27,8 @@ def as_review(record: ReviewRecord) -> Review:
         extraction_id=record.extraction_id,
         revision=record.revision,
         status=record.status,
-        confirmed_at=record.confirmed_at,
+        # PostgreSQL returns timestamptz in the session timezone; the wire contract uses UTC.
+        confirmed_at=record.confirmed_at.astimezone(UTC) if record.confirmed_at else None,
         **record.snapshot,
     )
 
