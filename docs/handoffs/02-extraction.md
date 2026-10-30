@@ -21,11 +21,15 @@ How a reply turns into values:
    wrong types, unbounded lists (`AI_OUTPUT_INVALID`).
 3. `app.validation.values` reads numbers and dates deterministically. Ambiguous
    readings (`1,234`, `03/04/2026`) and unreadable text (`2l1,3O`) become `null` with a
-   warning. They are not guessed or corrected.
+   warning. They are not guessed or corrected. A minus directly before or after the
+   number (`-12,50`, `12,50-`) or enclosing parentheses (`(12,50)`) make it negative;
+   detached or conflicting signs (`- 12,50`, `(-12,50)`) make it unreadable.
 4. Evidence: unknown unit IDs are dropped (`SOURCE_UNIT_UNKNOWN`). A quote must
    occur in its unit's text after whitespace is collapsed, otherwise it is dropped
    and the unit kept (`QUOTE_NOT_IN_SOURCE`). The printed value must occur in the quote,
-   otherwise `VALUE_NOT_IN_EVIDENCE`. Page, sheet and cell always come from the unit.
+   otherwise `VALUE_NOT_IN_EVIDENCE`. A value that starts or ends with a digit must not
+   continue a longer number there: `234,50` is not supported by `1.234,50`.
+   Page, sheet and cell always come from the unit.
 5. Domain rules: required/optional missing, option keys, ISO 4217 currency
    present and mentioned in the document, currency consistency, and arithmetic
    (see below). A failed check sets `needs_review` and adds a warning. Values are never rewritten.
@@ -201,8 +205,8 @@ Against PostgreSQL 16 (`docker.io/library/postgres:16` under podman) with
 
 | Command | Result |
 |---|---|
-| `uv run pytest tests/extraction` | 110 passed, 1 skipped (live test, not enabled) |
-| `uv run pytest` | 141 passed, 1 skipped, **1 failed**: `test_migration_and_transactional_enqueue` (request 3) |
+| `uv run pytest tests/extraction` | 124 passed, 1 skipped (live test, not enabled) |
+| `uv run pytest` | 155 passed, 1 skipped, **1 failed**: `test_migration_and_transactional_enqueue` (request 3) |
 | `uv run ruff check backend scripts tests` | passed |
 | `uv run ruff format --check backend scripts tests` | passed |
 | `uv lock --check` | passed |
@@ -225,7 +229,37 @@ or `uv run pytest tests/extraction/test_lifecycle.py -k worker_produces`.
   sustained 429 exhausts the three attempts quickly; the user can retry later.
 - If the model returns ISO dates instead of the printed form, the value is
   still read but marked `needs_review` (`VALUE_NOT_IN_EVIDENCE`).
-- Number evidence is checked by substring. `234,50` inside `1.234,50` would pass.
+- Space-grouped numbers are not checked for continuation: `600,00` is accepted as
+  evidence inside `48 600,00`, because table columns are also separated by single spaces.
+- **A run can also stay `queued` without a job.** Extraction counts its own attempts.
+  If a claim transaction rolls back (for example a database error while loading the
+  document) or the worker dies between claiming the job and claiming the run, the
+  job's attempt count runs ahead. On the job's last attempt the handler then still
+  raises `ExtractionRetryScheduled`, the platform fails the job, and the run stays
+  `queued`. The same platform failure hook or sweep as for `running` closes it.
 - Arithmetic checks depend on the conventional keys listed above. A `role` in the
   profile contract would make this explicit.
 - A document over 200,000 characters is rejected rather than split.
+
+## Assembly check against the other branches (2026-10-30)
+
+Run locally, not pushed: `codex/extraction` merged with `origin/codex/profiles`
+(`7fe7659`), `origin/codex/review` (`133e6ce`) and `origin/codex/integration`
+(`0757638`), plus a temporary merge revision over `0201_extractions`,
+`0301_profiles`, `0401_reviews` and `0501_submissions`. The merge had no conflicts.
+
+- `tests/extraction`: all passed on the assembled tree.
+- One throwaway end-to-end test ran the real modules: `create_form` and `create_profile`
+  from `contracts/examples`, `create_extractions`, `process_extraction` (fixture mode,
+  document stubbed with `contracts/examples/normalized-document.json` because no
+  documents branch is published yet), `get_review`, `save_review`, `confirm_review`, and
+  `create_submission` in export mode. The run was `ready`, the review `confirmed` and the
+  submission `prepared`.
+
+Found for member 5 during assembly (not changed here):
+- `0301_profiles` and `0401_reviews` live in `backend/app/<module>/migrations`, which
+  `backend/alembic.ini` does not list in `version_locations`. Four heads need one merge revision.
+- `tests/profiles/test_routes.py` and `tests/reviews/test_routes.py` share a basename,
+  so a full `pytest` run stops at collection. Add `__init__.py` packages or rename.
+- `tests/integrations/test_submissions.py::test_unavailable_owner_and_egrant_fail_honestly`
+  assumes the reviews module is absent and fails once it is merged.

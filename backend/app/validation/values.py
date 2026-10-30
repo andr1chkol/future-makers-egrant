@@ -78,15 +78,26 @@ def collapse_whitespace(text: str) -> str:
 
 def decimal_candidates(printed: str) -> set[Decimal]:
     """Return every reading of a printed number under common European and English notation."""
-    text = collapse_whitespace(printed).strip()
-    # Currency markers next to the number are tolerated; letters inside it are not.
-    # Trailing separators go too: "12,-" is the usual way to print a whole amount.
-    text = re.sub(r"^[^\d\-−+]+|[^\d]+$", "", text)
-    sign = ""
-    if text[:1] in {"-", "−"}:
-        sign, text = "-", text[1:]
-    elif text[:1] == "+":
-        text = text[1:]
+    match = re.fullmatch(r"(\D*)(\d(?:.*\d)?)(\D*)", collapse_whitespace(printed))
+    if match is None:
+        raise UnrecognizedValue("Not a number")
+    # Currency markers around the number are tolerated; letters inside it are not.
+    prefix, text, suffix = match.groups()
+    # "12,-" is the usual way to print a whole amount; that dash is not a sign.
+    suffix = re.sub(r"^[.,][-−–]", "", suffix)
+    # Accounting exports print negatives as "-12,50", "12,50-" or "(12,50)".
+    # Dropping such a marker would silently flip the sign of a debit.
+    markers = [
+        prefix.endswith(("-", "−")),
+        suffix.startswith(("-", "−")),
+        "(" in prefix and ")" in suffix,
+    ]
+    stray_signs = re.search(r"[-−]", prefix[:-1] if markers[0] else prefix) or re.search(
+        r"[-−]", suffix[1:] if markers[1] else suffix
+    )
+    if sum(markers) > 1 or stray_signs:
+        raise UnrecognizedValue("Conflicting or detached sign markers")
+    sign = "-" if any(markers) else ""
     text = re.sub(r"(?<=\d)[   '’](?=\d{3}(\D|$))", "", text)
     if not re.fullmatch(r"\d[\d.,]*", text):
         raise UnrecognizedValue("Not a number")

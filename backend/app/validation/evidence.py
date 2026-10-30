@@ -6,6 +6,7 @@ whitespace because OCR and spreadsheet normalization break lines differently
 from how a model reproduces them; any other difference makes a quote unverified.
 """
 
+import re
 from dataclasses import dataclass, field
 
 from app.platform.contracts import NormalizedDocument, SourceRef, SourceUnit
@@ -67,8 +68,17 @@ def quote_in_text(quote: str, text: str) -> bool:
 
 
 def printed_text_supported(printed: str, supporting_texts: list[str]) -> bool:
-    """Whether a value copied as printed occurs in its evidence, ignoring case and spacing."""
+    """Whether a value copied as printed occurs in its evidence, ignoring case and spacing.
+
+    A value that starts or ends with a digit must not continue a longer number in
+    the evidence, so "234,50" is not supported by "1.234,50" and "1.3.2026" is
+    not supported by "11.3.2026". Space-grouped numbers are not treated as
+    continuations because table columns are often separated by single spaces.
+    """
     needle = collapse_whitespace(printed).casefold()
-    return bool(needle) and any(
-        needle in collapse_whitespace(text).casefold() for text in supporting_texts
-    )
+    if not needle:
+        return False
+    before = r"(?<!\d)(?<!\d[.,'’])" if needle[0].isdigit() else ""
+    after = r"(?!\d)(?![.,'’]\d)" if needle[-1].isdigit() else ""
+    pattern = re.compile(before + re.escape(needle) + after)
+    return any(pattern.search(collapse_whitespace(text).casefold()) for text in supporting_texts)

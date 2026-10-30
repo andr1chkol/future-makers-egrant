@@ -1,4 +1,5 @@
 import pytest
+from app.validation.evidence import printed_text_supported
 from app.validation.values import (
     AmbiguousValue,
     UnrecognizedValue,
@@ -24,6 +25,9 @@ from app.validation.values import (
         ("10", "10.0"),
         ("EUR 48 600,00", "48600.00"),
         ("12,- €", "12.0"),
+        ("650,00-", "-650.00"),
+        ("(84,35)", "-84.35"),
+        ("€ (1.234,50)", "-1234.50"),
     ],
 )
 def test_decimal_normalization(printed, canonical):
@@ -41,7 +45,10 @@ def test_thousands_or_decimal_is_ambiguous(printed):
         normalize_decimal(printed)
 
 
-@pytest.mark.parametrize("printed", ["1O.00", "12,50,1", "abc", "1.2.3", "1,234.5.6"])
+@pytest.mark.parametrize(
+    "printed",
+    ["1O.00", "12,50,1", "abc", "1.2.3", "1,234.5.6", "-12,50-", "(-12,50)", "- 12,50", "12,50--"],
+)
 def test_ocr_noise_is_not_silently_corrected(printed):
     with pytest.raises(UnrecognizedValue):
         normalize_decimal(printed)
@@ -84,3 +91,19 @@ def test_currency_mentions():
     assert currencies_in_text("Spolu 120 Kč") == {"CZK"}
     # "EUROPE" or a lowercase word is not a currency mention.
     assert currencies_in_text("EUROPE and the euro area") == set()
+
+
+@pytest.mark.parametrize(
+    ("printed", "evidence", "supported"),
+    [
+        ("1.234,50", "Spolu 1.234,50 EUR", True),
+        ("234,50", "Spolu 1.234,50 EUR", False),
+        ("12,50", "12,505", False),
+        ("1.3.2026", "zo dňa 11.3.2026", False),
+        ("1.3.2026", "zo dňa 1.3.2026.", True),
+        ("48 600,00", "EUR 48 600,00", True),
+        ("ACME s.r.o.", "Dodávateľ: acme  s.r.o.", True),
+    ],
+)
+def test_printed_value_must_not_be_part_of_a_longer_number(printed, evidence, supported):
+    assert printed_text_supported(printed, [evidence]) is supported
