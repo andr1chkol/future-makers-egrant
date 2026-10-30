@@ -454,3 +454,59 @@ def test_ready_legacy_csv_units_are_not_rewritten_by_new_row_policy(
         assert [(unit.id, unit.cell, unit.text) for unit in sources.units] == [
             (legacy_id, "A1", "name")
         ]
+
+
+def test_worker_delayed_before_handler_cannot_leave_processing_with_completed_job(
+    document_database,
+    storage_compatibility,
+    csv_content,
+    monkeypatch,
+):
+    document = upload(document_database, csv_content)
+    first_entered, second_entered = threading.Event(), threading.Event()
+    release_first, release_second = threading.Event(), threading.Event()
+    parsing, release_parser = threading.Event(), threading.Event()
+    calls = 0
+    original_parser = service.parse_document
+
+    def delayed_handler(session, document_id):
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            first_entered.set()
+            assert release_first.wait(15)
+        elif calls == 2:
+            second_entered.set()
+            assert release_second.wait(15)
+        service.process_document(session, document_id)
+
+    def delayed_parser(*args, **kwargs):
+        if not parsing.is_set():
+            parsing.set()
+            assert release_parser.wait(15)
+        return original_parser(*args, **kwargs)
+
+    jobs = JobRegistry()
+    jobs.register_handler("document.process", delayed_handler)
+    monkeypatch.setattr(service, "parse_document", delayed_parser)
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        first = pool.submit(run_once, document_database, jobs)
+        assert first_entered.wait(15)
+        with document_database.begin() as session:
+            job = session.scalar(select(Job))
+            job.lease_until = session.scalar(select(func.now())) - timedelta(seconds=1)
+        second = pool.submit(run_once, document_database, jobs)
+        assert second_entered.wait(15)
+        release_first.set()
+        assert parsing.wait(15)
+        release_second.set()
+        assert second.result(timeout=15)
+        release_parser.set()
+        assert first.result(timeout=15)
+    with document_database() as session:
+        assert session.scalar(select(Job)).status == "queued"
+    make_jobs_available(document_database)
+    assert run_once(document_database, jobs)
+    with document_database() as session:
+        assert service.get_document(session, document.id).status == "ready"
+        assert len(service.get_normalized(session, document.id).units) == 3

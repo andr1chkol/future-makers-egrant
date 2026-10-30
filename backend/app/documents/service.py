@@ -285,9 +285,11 @@ def process_document(session: Session, document_id: UUID) -> None:
             raise ConflictError()
         token, job_id = job.lease_token, job.id
         if record.processing_token == token:
-            return
+            # Another invocation is still working under this lease. Reporting success here
+            # would let a delayed worker complete the job before its sources are committed.
+            raise ConflictError()
         if record.attempts >= 3:
-            return
+            raise ConflictError()
         record.processing_token = token
         record.attempts += 1
         record.status, record.error = "processing", None
