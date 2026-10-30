@@ -8,6 +8,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException
 
+from app.integrations.routes import router as integrations_router
 from app.platform.access import (
     COOKIE_NAME,
     check_origin,
@@ -22,6 +23,7 @@ from app.platform.logging import log, request_id
 from app.platform.models import AccessSession
 from app.platform.routes import router
 from app.platform.settings import get_settings
+from app.profiles.routes import router as profiles_router
 
 ERROR_RESPONSES = {
     status: {"model": ErrorEnvelope} for status in [401, 403, 404, 409, 413, 422, 500, 502, 503]
@@ -133,6 +135,10 @@ def create_app() -> FastAPI:
         }
 
     app.include_router(router, prefix="/api/v1", dependencies=[Depends(require_access)])
+    app.include_router(
+        integrations_router, prefix="/api/v1", dependencies=[Depends(require_access)]
+    )
+    app.include_router(profiles_router, prefix="/api/v1", dependencies=[Depends(require_access)])
     return app
 
 

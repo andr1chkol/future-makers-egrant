@@ -1,23 +1,31 @@
 # eGrant document assistant
 
-Shared foundation for document-to-form extraction with mandatory human review.
+Document-to-form extraction with mandatory human review.
 Repository: https://github.com/andr1chkol/future-makers-egrant.
 
-This bootstrap candidate provides contracts, platform infrastructure and feature
-shells. Domain operations return `503 FEATURE_UNAVAILABLE`. The reference invoice
-and linked examples are synthetic. Upload, extraction, profile editing, review,
-confirmation and export need the four module implementations and integration.
-No OCR, AI or eGrant provider is called. Credentials alone do not enable adapters.
+On `codex/integration`, the reviewed profiles module supports illustrative form
+import, mapping configuration and immutable profile versions. Confirmed submission
+persistence, idempotent JSON export, history/status pages and recovery logging are
+also implemented. Missing document, extraction and review registrations return
+`503 FEATURE_UNAVAILABLE`; they are not replaced with runtime example records.
+Existing exports remain downloadable from their stored immutable payload.
+
+The published `bootstrap-v1` is commit
+`88d1b959c524cfd559d01ee8ff6ac3f183f7c9e8`. It remains unchanged. Domain
+modules are integrated through independently reviewed PRs; the complete product
+workflow is still pending. OCR, AI and eGrant application writes are unavailable.
+Credentials alone do not enable them. Export JSON does not apply data to eGrant.
+See `docs/release/INTEGRATION-HANDOFF.md` for evidence and remaining dependencies.
 
 ## Start with Docker
 
-Install Docker Desktop with Compose, Git, Python 3.12, uv 0.13.6 and Node 22.12+
+Install Docker Desktop with Compose, Git, Python 3.12, uv 0.13.6 and Node 22.12+, 24.x or 26+ (supported even-numbered releases)
 with npm. Docker runs the application; host Python/Node are for checks and tests.
 
 ```sh
 git clone https://github.com/andr1chkol/future-makers-egrant.git
 cd future-makers-egrant
-git switch codex/bootstrap
+git switch codex/integration
 cp .env.example .env
 make dev
 ```
@@ -29,9 +37,8 @@ banner. It never changes an eGrant application. Private uploads use a Docker
 volume that is not served by the frontend. Stop with `docker compose down`;
 keep volumes to preserve data. Do not use `down -v` on data you need.
 
-Before team module work, member 4 must review the PR in a fresh chat and the
-approved commit must be tagged `bootstrap-v1`. Until then this branch is a
-candidate, not an approved baseline. After publication use:
+Module owners start from the immutable published baseline, not an unmerged
+integration branch:
 
 ```sh
 git fetch origin --tags
@@ -71,18 +78,43 @@ make e2e
 ```
 
 `make check` checks locks, lint, formatting, OpenAPI drift, generated types and
-frontend build. `make test` checks schemas, source agreement, access, redaction,
-storage, migrations, concurrent claim/recovery, retry and session persistence.
-`make e2e` starts isolated local API/frontend servers on 8011/5174 and checks the
-shell and fixture banner in desktop/mobile layouts. Keep those test ports free. The complete document-to-export workflow and
-assembled domain-route coverage are pending module integration, not passing tests.
-Screenshots are written to docs/release by the shell E2E.
+frontend build. `make test` covers schemas, access, redaction, storage, migrations,
+queue recovery, concurrent submission idempotency, invalid/stale reviews and exact
+human corrections in the persisted export. Database tests use real PostgreSQL 16.
+`make e2e` starts isolated API/frontend servers on 8011/5174 and tests the shell.
+
+The dedicated submission browser suite uses another disposable database and
+ports 8013/5176. It resets only a database whose name starts with egrant_test_e2e:
+
+```sh
+docker exec egrant-bootstrap-test createdb -U egrant egrant_test_e2e_integration
+export INTEGRATION_E2E_DATABASE_URL=postgresql+psycopg://egrant:local-test-only@localhost:55432/egrant_test_e2e_integration
+make e2e-integration
+```
+
+Profiles have two additional browser suites (two UI-adapter scenarios and one
+real UI/API/PostgreSQL workflow with two distinct forms). Use a separate empty
+test database; the guarded test server applies the production migrations itself:
+
+```sh
+docker exec egrant-bootstrap-test createdb -U egrant egrant_test_profiles_browser
+TEST_DATABASE_URL=postgresql+psycopg://egrant:local-test-only@localhost:55432/egrant_test_profiles_browser make e2e-profiles
+```
+
+The submission suite uses explicit test-only neighboring public-interface doubles while
+exercising the real submission routes, PostgreSQL persistence and JSON download.
+History UI tests mock the absent extraction list. It is not a complete
+upload/extract/review workflow or a live-provider check. Keep test ports free.
+The complete flow and assembled domain-route coverage remain pending review,
+extraction and documents implementations. CI runs foundation, submission and both
+profile browser suites. Artifacts include docs/release screenshots and frontend
+test-results.
 
 ## Contracts and module ownership
 
 Read `AGENTS.md`, `CONTRACT.md`, `QUALITY.md`, `docs/team/README.md` and
 `contracts/internal.md` before implementation. Root CONTRACT/QUALITY and their
-team copies must stay identical. `BASE_BRANCH=main`; setup is `codex/bootstrap`.
+team copies must stay identical. `BASE_BRANCH=main`; setup was `codex/bootstrap`, integration is `codex/integration`.
 The current architecture has no pre-existing application code to reconcile.
 
 `backend/app/platform/contracts.py` defines public Pydantic DTOs. Run
@@ -92,7 +124,9 @@ Do not duplicate models in features. The examples include a missing purchase
 order, warnings, table rows, exact sources and a separate human correction.
 `python scripts/create_examples.py` rebuilds them deterministically.
 
-Platform migration: `0001_platform`. Reserve `010*` documents, `020*` extraction,
+Platform migration: `0001_platform`; integration migration: `0501_submissions`.
+`0502_profiles_assembly` merges it with the unchanged owned `0301_profiles`.
+Reserve `010*` documents, `020*` extraction,
 `030*` profiles, `040*` reviews and `050*` integrations. Module migrations branch
 from `0001_platform`; member 5 reconciles heads with a merge migration. Request
 shared dependencies, registrations or contracts in each module handoff and PR.
@@ -120,14 +154,19 @@ The selected versions are resolved in shared lockfiles. Python 3.12 and Pydantic
 v2 follow [FastAPI release guidance](https://fastapi.tiangolo.com/release-notes/).
 PostgreSQL uses the explicit psycopg 3 dialect described in
 [SQLAlchemy 2.0](https://docs.sqlalchemy.org/en/20/dialects/postgresql.html#psycopg).
-Node 22.12+ follows [Vite requirements](https://vite.dev/guide/).
+Node 22.12+, 24.x or 26+ (supported even-numbered releases) follows [Vite requirements](https://vite.dev/guide/).
 Locked installs follow [uv project guidance](https://docs.astral.sh/uv/guides/projects/).
 
 ## Review and release
 
-Authors self-review the final diff. Member 4 independently reviews bootstrap
-using `docs/team/06-PEER-REVIEW.md` against the exact PR head. Do not move an
-existing bootstrap-v1 tag or merge automatically. After approval and checks,
-publish that tag and SHA, then continue with `05-INTEGRATION-PROMPT.md` on
-`codex/integration`. Member 1 runs `07-RELEASE-REVIEW.md` after module assembly.
-The shell is not evidence of a working extraction product.
+Authors self-review the final diff. Member 4 independently reviews integration
+using `docs/team/06-PEER-REVIEW.md` against the exact PR head. The bootstrap review
+report is published in [PR #2](https://github.com/andr1chkol/future-makers-egrant/pull/2)
+for head 70370b3; its tree matches the baseline merge. Do not move bootstrap-v1
+or automatically merge module PRs. Member 1 runs `07-RELEASE-REVIEW.md` after
+assembly. The fixture/test interface doubles are not product adapters.
+
+`docs/release/INTEGRATION-HANDOFF.md` contains the provider matrix, dependency
+requests, demo procedure, remaining evaluation scenarios and release checklist.
+No external application write is enabled. A future live write needs a documented
+application-data interface, authorized test target and explicit human confirmation.
