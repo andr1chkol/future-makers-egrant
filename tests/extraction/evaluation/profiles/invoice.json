@@ -1,0 +1,123 @@
+{
+  "id": "00000000-0000-4000-8000-0000000000a1",
+  "version": 1,
+  "name": "Faktúra",
+  "documentKind": "invoice",
+  "formId": "00000000-0000-4000-8000-0000000000f1",
+  "scalarFields": [
+    {
+      "key": "invoice_number",
+      "label": "Číslo faktúry",
+      "type": "string",
+      "description": "Invoice number assigned by the supplier",
+      "required": true,
+      "targetTag": "invoice_number"
+    },
+    {
+      "key": "supplier",
+      "label": "Dodávateľ",
+      "type": "string",
+      "description": "Name of the supplier (seller, issuer, Dodávateľ) without address",
+      "required": true,
+      "targetTag": "supplier"
+    },
+    {
+      "key": "buyer",
+      "label": "Odberateľ",
+      "type": "string",
+      "description": "Name of the buyer (customer, recipient, Odberateľ) without address",
+      "required": true,
+      "targetTag": "buyer"
+    },
+    {
+      "key": "issue_date",
+      "label": "Dátum vystavenia",
+      "type": "date",
+      "description": "Date the invoice was issued",
+      "required": true,
+      "targetTag": "issue_date"
+    },
+    {
+      "key": "due_date",
+      "label": "Dátum splatnosti",
+      "type": "date",
+      "description": "Payment due date",
+      "required": false,
+      "targetTag": "due_date"
+    },
+    {
+      "key": "purchase_order",
+      "label": "Objednávka",
+      "type": "string",
+      "description": "Buyer's purchase order number",
+      "required": false,
+      "targetTag": "purchase_order"
+    },
+    {
+      "key": "net_total",
+      "label": "Základ dane",
+      "type": "money",
+      "description": "Total without VAT (tax base)",
+      "required": true,
+      "targetTag": "net_total"
+    },
+    {
+      "key": "vat_total",
+      "label": "DPH",
+      "type": "money",
+      "description": "VAT amount only",
+      "required": true,
+      "targetTag": "vat_total"
+    },
+    {
+      "key": "total",
+      "label": "Celkom",
+      "type": "money",
+      "description": "Total including VAT, amount to pay",
+      "required": true,
+      "targetTag": "total"
+    }
+  ],
+  "tableFields": [
+    {
+      "key": "items",
+      "label": "Položky",
+      "targetTag": "items",
+      "writeMode": "append",
+      "columns": [
+        {
+          "key": "description",
+          "label": "Popis",
+          "type": "string",
+          "description": "Item description",
+          "required": true,
+          "targetTag": "description"
+        },
+        {
+          "key": "quantity",
+          "label": "Množstvo",
+          "type": "decimal",
+          "description": "Quantity",
+          "required": true,
+          "targetTag": "quantity"
+        },
+        {
+          "key": "unit_price",
+          "label": "Jednotková cena",
+          "type": "money",
+          "description": "Unit price without VAT",
+          "required": true,
+          "targetTag": "unit_price"
+        },
+        {
+          "key": "line_total",
+          "label": "Spolu",
+          "type": "money",
+          "description": "Line total without VAT",
+          "required": true,
+          "targetTag": "line_total"
+        }
+      ]
+    }
+  ]
+}

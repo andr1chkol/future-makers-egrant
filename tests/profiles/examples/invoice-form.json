@@ -1,0 +1,23 @@
+{
+  "illustrative": true,
+  "helpHtml": "<strong>Example configuration only</strong>",
+  "sections": [
+    {
+      "label": "Faktúra",
+      "fields": [
+        { "tag": "invoice.reference", "label": "Číslo faktúry", "type": "string", "required": true },
+        { "tag": "invoice.total", "label": "Celková suma", "type": "money", "required": true }
+      ],
+      "tables": [
+        {
+          "tag": "invoice.items",
+          "label": "Položky",
+          "columns": [
+            { "tag": "item.description", "label": "Popis", "type": "string", "required": true },
+            { "tag": "item.price", "label": "Cena", "type": "money", "required": true }
+          ]
+        }
+      ]
+    }
+  ]
+}

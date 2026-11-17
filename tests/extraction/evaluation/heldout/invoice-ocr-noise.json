@@ -1,0 +1,303 @@
+{
+  "name": "invoice-ocr-noise",
+  "profile": "invoice",
+  "options": {},
+  "document": {
+    "documentId": "00000000-0000-4000-8000-0000000000d3",
+    "units": [
+      {
+        "id": "o1",
+        "text": "FAKTURA c. INV-88/2026",
+        "page": 1,
+        "sheet": null,
+        "cell": null
+      },
+      {
+        "id": "o2",
+        "text": "Dodavatel:\nTlačiareň Sever, s.r.o.\nPriemyselná 5, Žilina",
+        "page": 1,
+        "sheet": null,
+        "cell": null
+      },
+      {
+        "id": "o3",
+        "text": "Odberatel: Mestská knižnica Ružomberok",
+        "page": 1,
+        "sheet": null,
+        "cell": null
+      },
+      {
+        "id": "o4",
+        "text": "Datum vystavenia: 5. októbra 2026",
+        "page": 1,
+        "sheet": null,
+        "cell": null
+      },
+      {
+        "id": "o5",
+        "text": "Tlač plagátov A2   50 ks   1,90   95,00",
+        "page": 1,
+        "sheet": null,
+        "cell": null
+      },
+      {
+        "id": "o6",
+        "text": "Grafický návrh    1 ks   120,00   120,00",
+        "page": 1,
+        "sheet": null,
+        "cell": null
+      },
+      {
+        "id": "o7",
+        "text": "Základ: 215,00 EUR  DPH 23%: 49,45 EUR",
+        "page": 1,
+        "sheet": null,
+        "cell": null
+      },
+      {
+        "id": "o8",
+        "text": "Spolu: 264,45 EUR",
+        "page": 1,
+        "sheet": null,
+        "cell": null
+      }
+    ]
+  },
+  "expected": {
+    "fields": {
+      "invoice_number": "INV-88/2026",
+      "supplier": "Tlačiareň Sever, s.r.o.",
+      "buyer": "Mestská knižnica Ružomberok",
+      "issue_date": "2026-10-05",
+      "due_date": null,
+      "purchase_order": null,
+      "net_total": {
+        "amount": "215.00",
+        "currency": "EUR"
+      },
+      "vat_total": {
+        "amount": "49.45",
+        "currency": "EUR"
+      },
+      "total": {
+        "amount": "264.45",
+        "currency": "EUR"
+      }
+    },
+    "tables": {
+      "items": [
+        {
+          "description": "Tlač plagátov A2",
+          "quantity": "50.0",
+          "unit_price": {
+            "amount": "1.90",
+            "currency": "EUR"
+          },
+          "line_total": {
+            "amount": "95.00",
+            "currency": "EUR"
+          }
+        },
+        {
+          "description": "Grafický návrh",
+          "quantity": "1.0",
+          "unit_price": {
+            "amount": "120.00",
+            "currency": "EUR"
+          },
+          "line_total": {
+            "amount": "120.00",
+            "currency": "EUR"
+          }
+        }
+      ]
+    }
+  },
+  "recordedReply": {
+    "fields": {
+      "invoice_number": {
+        "value": "INV-88/2026",
+        "evidence": [
+          {
+            "unitId": "o1",
+            "quote": "INV-88/2026"
+          }
+        ]
+      },
+      "supplier": {
+        "value": "Mestská knižnica Ružomberok",
+        "evidence": [
+          {
+            "unitId": "o3",
+            "quote": "Mestská knižnica Ružomberok"
+          }
+        ]
+      },
+      "buyer": {
+        "value": "Tlačiareň Sever, s.r.o.",
+        "evidence": [
+          {
+            "unitId": "o2",
+            "quote": "Tlačiareň Sever, s.r.o."
+          }
+        ]
+      },
+      "issue_date": {
+        "value": "5. októbra 2026",
+        "evidence": [
+          {
+            "unitId": "o4",
+            "quote": "5. októbra 2026"
+          }
+        ]
+      },
+      "due_date": {
+        "value": "19.10.2026",
+        "evidence": [
+          {
+            "unitId": "o4",
+            "quote": "5. októbra 2026"
+          }
+        ]
+      },
+      "purchase_order": {
+        "value": null,
+        "evidence": []
+      },
+      "net_total": {
+        "value": {
+          "amount": "215,00",
+          "currency": "EUR"
+        },
+        "evidence": [
+          {
+            "unitId": "o7",
+            "quote": "215,00"
+          }
+        ]
+      },
+      "vat_total": {
+        "value": {
+          "amount": "49,45",
+          "currency": "EUR"
+        },
+        "evidence": [
+          {
+            "unitId": "o7",
+            "quote": "49,45"
+          }
+        ]
+      },
+      "total": {
+        "value": {
+          "amount": "264,45",
+          "currency": "EUR"
+        },
+        "evidence": [
+          {
+            "unitId": "o8",
+            "quote": "264,45"
+          }
+        ]
+      }
+    },
+    "tables": {
+      "items": {
+        "rows": [
+          {
+            "cells": {
+              "description": {
+                "value": "Tlač plagátov A2",
+                "evidence": [
+                  {
+                    "unitId": "o5",
+                    "quote": "Tlač plagátov A2"
+                  }
+                ]
+              },
+              "quantity": {
+                "value": "50",
+                "evidence": [
+                  {
+                    "unitId": "o5",
+                    "quote": "50"
+                  }
+                ]
+              },
+              "unit_price": {
+                "value": {
+                  "amount": "1,90",
+                  "currency": "EUR"
+                },
+                "evidence": [
+                  {
+                    "unitId": "o5",
+                    "quote": "1,90"
+                  }
+                ]
+              },
+              "line_total": {
+                "value": {
+                  "amount": "95,00",
+                  "currency": "EUR"
+                },
+                "evidence": [
+                  {
+                    "unitId": "o5",
+                    "quote": "95,00"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "cells": {
+              "description": {
+                "value": "Grafický návrh",
+                "evidence": [
+                  {
+                    "unitId": "o6",
+                    "quote": "Grafický návrh"
+                  }
+                ]
+              },
+              "quantity": {
+                "value": "1",
+                "evidence": [
+                  {
+                    "unitId": "o6",
+                    "quote": "1"
+                  }
+                ]
+              },
+              "unit_price": {
+                "value": {
+                  "amount": "120,00",
+                  "currency": "EUR"
+                },
+                "evidence": [
+                  {
+                    "unitId": "o6",
+                    "quote": "120,00"
+                  }
+                ]
+              },
+              "line_total": {
+                "value": {
+                  "amount": "120,00",
+                  "currency": "EUR"
+                },
+                "evidence": [
+                  {
+                    "unitId": "o6",
+                    "quote": "120,00"
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

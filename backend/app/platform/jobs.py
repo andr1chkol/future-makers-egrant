@@ -10,7 +10,8 @@ from sqlalchemy import and_, func, or_, select, update
 from sqlalchemy.orm import Session, sessionmaker
 
 from app.platform.contracts import JobKind
-from app.platform.logging import log, request_id
+from app.platform.logging import job_attempt, log, request_id
+from app.platform.logging import job_id as current_job_id
 from app.platform.models import Job
 
 
@@ -89,6 +90,8 @@ def run_once(factory: sessionmaker[Session], registry: JobRegistry) -> bool:
         kind, payload, attempt, max_attempts = job.kind, job.payload, job.attempt, job.max_attempts
         correlation = str(job.request_id) if job.request_id else None
     context_token = request_id.set(correlation)
+    job_token = current_job_id.set(str(job_id))
+    attempt_token = job_attempt.set(attempt)
     try:
         handler = registry.handlers.get(kind)
         if handler is None:
@@ -130,4 +133,6 @@ def run_once(factory: sessionmaker[Session], registry: JobRegistry) -> bool:
             log("job.completed", jobId=job_id, attempt=attempt)
     finally:
         request_id.reset(context_token)
+        current_job_id.reset(job_token)
+        job_attempt.reset(attempt_token)
     return True

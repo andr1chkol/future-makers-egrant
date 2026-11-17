@@ -1,0 +1,29 @@
+{
+  "illustrative": true,
+  "unsupportedPresentation": { "collapsed": false, "color": "green" },
+  "sections": [
+    {
+      "label": "Cesta",
+      "fields": [
+        { "tag": "traveller", "label": "Cestujúci", "type": "string", "required": true },
+        {
+          "tag": "transport",
+          "label": "Doprava",
+          "type": "string",
+          "required": true,
+          "options": [{ "key": "rail", "label": "Vlak" }, { "key": "air", "label": "Lietadlo" }]
+        }
+      ],
+      "tables": [
+        {
+          "tag": "journeys",
+          "label": "Cesty",
+          "columns": [
+            { "tag": "destination", "label": "Cieľ", "type": "string", "required": true },
+            { "tag": "travel_date", "label": "Dátum", "type": "date", "required": false }
+          ]
+        }
+      ]
+    }
+  ]
+}

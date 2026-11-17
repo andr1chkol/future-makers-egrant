@@ -1,0 +1,183 @@
+{
+  "description": "Recorded reply for the synthetic invoice parsed into CSV cells.",
+  "fingerprint": "e452dc39b5fc885878a448161ec5c606acacf29e4abe5cf2f4936f1e2a25ea07",
+  "reply": {
+    "fields": {
+      "invoice_number": {
+        "value": "DEMO-2026-001",
+        "evidence": [
+          {
+            "unitId": "A2",
+            "quote": "DEMO-2026-001"
+          }
+        ]
+      },
+      "supplier": {
+        "value": "Demo Paper s.r.o.",
+        "evidence": [
+          {
+            "unitId": "B2",
+            "quote": "Demo Paper s.r.o."
+          }
+        ]
+      },
+      "issue_date": {
+        "value": "2026-10-20",
+        "evidence": [
+          {
+            "unitId": "C2",
+            "quote": "2026-10-20"
+          }
+        ]
+      },
+      "buyer": {
+        "value": "Demo Grant Association",
+        "evidence": [
+          {
+            "unitId": "D2",
+            "quote": "Demo Grant Association"
+          }
+        ]
+      },
+      "purchase_order": {
+        "value": null,
+        "evidence": []
+      },
+      "total": {
+        "value": {
+          "amount": "55.00",
+          "currency": "EUR"
+        },
+        "evidence": [
+          {
+            "unitId": "I4",
+            "quote": "55.00"
+          }
+        ]
+      }
+    },
+    "tables": {
+      "items": {
+        "rows": [
+          {
+            "cells": {
+              "description": {
+                "value": "Workshop notebooks",
+                "evidence": [
+                  {
+                    "unitId": "F2",
+                    "quote": "Workshop notebooks"
+                  }
+                ]
+              },
+              "quantity": {
+                "value": "2.00",
+                "evidence": [
+                  {
+                    "unitId": "G2",
+                    "quote": "2.00"
+                  }
+                ]
+              },
+              "unit_price": {
+                "value": {
+                  "amount": "12.50",
+                  "currency": "EUR"
+                },
+                "evidence": [
+                  {
+                    "unitId": "H2",
+                    "quote": "12.50"
+                  }
+                ]
+              },
+              "line_total": {
+                "value": {
+                  "amount": "25.00",
+                  "currency": "EUR"
+                },
+                "evidence": [
+                  {
+                    "unitId": "I2",
+                    "quote": "25.00"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "cells": {
+              "description": {
+                "value": "Training materials",
+                "evidence": [
+                  {
+                    "unitId": "F3",
+                    "quote": "Training materials"
+                  }
+                ]
+              },
+              "quantity": {
+                "value": "3.00",
+                "evidence": [
+                  {
+                    "unitId": "G3",
+                    "quote": "3.00"
+                  }
+                ]
+              },
+              "unit_price": {
+                "value": {
+                  "amount": "10.00",
+                  "currency": "EUR"
+                },
+                "evidence": [
+                  {
+                    "unitId": "H3",
+                    "quote": "10.00"
+                  }
+                ]
+              },
+              "line_total": {
+                "value": {
+                  "amount": "30.00",
+                  "currency": "EUR"
+                },
+                "evidence": [
+                  {
+                    "unitId": "I3",
+                    "quote": "30.00"
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "unitKeys": [
+    "A1",
+    "B1",
+    "C1",
+    "D1",
+    "E1",
+    "F1",
+    "G1",
+    "H1",
+    "I1",
+    "A2",
+    "B2",
+    "C2",
+    "D2",
+    "F2",
+    "G2",
+    "H2",
+    "I2",
+    "F3",
+    "G3",
+    "H3",
+    "I3",
+    "F4",
+    "I4"
+  ]
+}

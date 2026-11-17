@@ -11,7 +11,7 @@ test("fixture banner persists across feature routes and narrow layouts", async (
     page.getByText("Ukážkový režim", { exact: false }),
   ).toBeVisible();
   await expect(
-    page.getByText("Táto funkcia zatiaľ nie je dostupná."),
+    page.getByRole("button", { name: "Vybrať súbory" }),
   ).toBeVisible();
   await page.getByRole("link", { name: "Profily", exact: true }).click();
   await expect(
