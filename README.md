@@ -1,47 +1,28 @@
-# eGrant document assistant
+# eGrant Document Assistant
 
-Document-to-form extraction with mandatory human review.
-Repository: https://github.com/andr1chkol/future-makers-egrant.
+Turn invoice data into a form draft. Review the extracted fields and line items beside the original document, correct them, and confirm before exporting JSON.
 
-The `codex/finish-product` branch assembles private document intake, profile
-configuration, extraction, human review, and confirmed JSON export. The default
-fixture mode runs the real application and worker with a recorded AI response
-for the shared synthetic invoice. Unknown fixtures fail explicitly.
+## Try the demo
 
-Live extraction uses the OpenAI adapter when `APP_MODE=live`,
-`OPENAI_API_KEY`, and `OPENAI_MODEL` are configured. Live mode also requires
-the access gate settings below. OCR requires explicit Tesseract configuration.
-JSON export prepares values for an integration; it does not write to eGrant.
-The `bootstrap-v1` tag remains unchanged.
-
-## Start with Docker
-
-Install Docker Desktop with Compose, Git, Python 3.12, uv 0.13.6 and Node 22.12+, 24.x or 26+ (supported even-numbered releases)
-with npm. Docker runs the application; host Python/Node are for checks and tests.
+Requirements: Git and Docker with Compose.
 
 ```sh
 git clone https://github.com/andr1chkol/future-makers-egrant.git
 cd future-makers-egrant
-git switch codex/finish-product
 cp .env.example .env
-make dev
+docker compose up --build --wait
 ```
 
-Open http://localhost:5173. Compose starts PostgreSQL 16, applies migrations,
-then starts API, worker and frontend. Ports bind to loopback only; PostgreSQL uses 55433 (override DB_PORT if needed). The default
-fixture configuration permits localhost access and shows a persistent yellow
-banner. It never changes an eGrant application. Private uploads use a Docker
-volume that is not served by the frontend. Stop with `docker compose down`;
-keep volumes to preserve data. Do not use `down -v` on data you need.
+1. Open [the app](http://localhost:5173).
+2. Upload the [sample invoice](contracts/examples/synthetic-invoice.csv) and start extraction.
+3. Review the fields and line items, make a correction, and confirm.
+4. Download the confirmed JSON.
 
-Module owners start from the immutable published baseline, not an unmerged
-integration branch:
+The default fixture mode parses the uploaded sample and uses a recorded model response. It needs no API key. The optional live mode requires an OpenAI key and model. OCR uses Tesseract when configured. The app exports JSON for integration with eGrant. Direct form submission to eGrant is outside this release.
 
-```sh
-git fetch origin --tags
-git rev-parse 'bootstrap-v1^{commit}'
-git switch -c codex/documents bootstrap-v1
-```
+Stop the app with `docker compose down`. Docker preserves the local database and uploads in volumes.
+
+[Verification results and release scope](docs/release/FINISH-PRODUCT.md)
 
 ## Local development and verification
 
