@@ -33,7 +33,13 @@ from sqlalchemy.orm import sessionmaker
 def create_browser_test_app():
     settings = get_settings()
     url = settings.database_url.get_secret_value()
-    if settings.app_mode != "fixture" or make_url(url).database != "egrant_test_documents_e2e":
+    target = make_url(url)
+    if (
+        settings.app_mode != "fixture"
+        or target.get_backend_name() != "postgresql"
+        or target.query
+        or target.database != "egrant_test_documents_e2e"
+    ):
         raise RuntimeError("Browser tests require the dedicated egrant_test_documents_e2e database")
     engine = create_engine(url, hide_parameters=True)
     with engine.begin() as session:

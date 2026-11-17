@@ -7,7 +7,7 @@ from fastapi.testclient import TestClient
 from pydantic import ValidationError
 
 
-def test_fixture_no_provider_startup_and_unavailable_routes():
+def test_fixture_no_provider_startup_and_extraction_list(database):
     with TestClient(create_app(), base_url="http://localhost") as client:
         result = client.get("/api/v1/capabilities")
         assert result.status_code == 200
@@ -19,8 +19,8 @@ def test_fixture_no_provider_startup_and_unavailable_routes():
         }
         assert UUID(result.headers["x-request-id"])
         response = client.get("/api/v1/extractions")
-        assert response.status_code == 503
-        assert response.json()["error"]["code"] == "FEATURE_UNAVAILABLE"
+        assert response.status_code == 200
+        assert response.json()["data"] == []
         assert client.get("/api/v1/documents?limit=201").status_code == 422
         assert client.get("/api/v1/documents/invalid-id").status_code == 422
 

@@ -190,48 +190,23 @@ permits numeric revision/version and UUID profileId/formId. PR #5 fixes recovery
 correlation and is merged into integration. The seven profile/form operations
 from reviewed e845099 replace their shells. Profiles models and migration location
 are registered; production profile routes are used by both API/browser tests.
-Review PR #3 and Draft extraction PR #6 lack independent verdicts and remain
-unregistered; documents is unpublished. Do not rewrite their owned migrations.
+The continuation registers the document, extraction and review modules. Its
+verification and review limits are recorded in docs/release/FINISH-PRODUCT.md.
 
-## Extraction recovery coordination (pending member 2 and review)
+## Extraction and review assembly
 
-Member 2 requested extraction router/handler registration, migration discovery,
-aiConfigured from OpenAIProvider.from_settings and terminal-job recovery. The
-shared changes land with the independently reviewed extraction head, not by
-adding an unreviewed module to main. No new HTTP DTO or dependency is needed.
+The shared worker registers `process_extraction` and invokes
+`recover_terminal_extractions` in a fresh session on each polling cycle.
+A terminal job can fail an orphan run, but a newer active job takes precedence.
+The worker lease is 60 seconds and the provider call has a 40-second caller
+deadline. Outstanding OpenAI request threads share four slots per process.
 
-Proposed public synchronous owner interface:
-
-```python
-# app.extraction.service
-recover_terminal_extractions(session: Session) -> None
-```
-
-This function is not implemented/registered on this integration head. Member 2
-owns the domain transition; member 5 will invoke it with a fresh Session in the
-worker polling loop alongside submission recovery. It owns its short transaction,
-locks a bounded batch of queued/running extraction rows with SKIP LOCKED and
-selects a deterministic failed extraction.process job per resource. It must skip
-resources with any queued/running job, including a newer manual retry. Set the
-extraction to failed with a safe error and invalidate run_token, preserving human
-review/results. Emit extraction.failed after commit with original requestId,
-jobId, extractionId, documentId and job attempt. Do not reset the attempt budget
-or automatically issue more paid calls. A late worker must fail token fencing.
-
-Regression cases required from member 2: crash on the final lease; handler leaves
-queued on the queue's final failed attempt; active newer retry; completed ready
-run; concurrent sweep/retry; late worker; repeat recovery; safe correlated logs.
-The platform turns expired exhausted leases into failed jobs on claim; recovery
-may therefore happen on the next polling cycle. Provider HTTP remains outside DB
-transactions. Current lease is 60 s and provider socket timeout is 40 s. The
-socket timeout is not proof of an end-to-end deadline; provider/read/parse behavior
-under delays must be checked before claiming the work always fits the lease.
-No lease renewal or live-provider timeout verification is added by this change.
-
-After review, register process_extraction explicitly and compute aiConfigured
-from the actual configured OpenAI adapter. Keep ocrConfigured/egrantConfigured
-false until their respective implemented adapters exist. Preserve explicit
-fixture mode; presence of a key alone must not bypass a missing module.
+The extraction and review routers replace their bootstrap shells. Alembic
+revision `0504_full_assembly` joins `0503_documents_assembly`,
+`0201_extractions` and `0401_reviews`. Original published revisions are unchanged.
+Option snapshots distinguish scalar and table scopes. Legacy flat snapshots
+are reconstructed from the immutable form, where colliding options cannot be
+recovered from the flat keys themselves.
 
 ## Documents assembly
 
@@ -250,11 +225,7 @@ same lock before checking row absence and deleting an old orphan. Positive hash
 locks remain reserved for duplicate serialization. See the documents assembly
 handoff for supported runtime and multipart boundary limits.
 
-The existing extraction fixture expects row-based normalized units and fingerprints
-unit IDs. Actual CSV intake emits UUIDv5 cell units tied to each new document.
-An isolated public-interface probe against extraction f21eb84 reaches durable
-FIXTURE_NOT_AVAILABLE. Member 2 must supply fixture recognition/rebinding for actual
-cell sources, retaining genuine source IDs/quotes and explicit fixture-only mode.
-Do not alter the synthetic CSV bytes/hash or substitute the old normalized example
-in the production documents service. Full successful extraction assembly remains
-blocked pending that owner change and exact-head independent review.
+The CSV fixture matches the ordered normalized text and cell locations without
+depending on upload-specific IDs. The recorded cell evidence is rebound to the
+actual normalized units only after a match. The original row-based reference
+still works for existing tests. Neither recording is used in live mode.

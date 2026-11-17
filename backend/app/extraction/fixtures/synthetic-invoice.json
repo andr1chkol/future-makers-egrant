@@ -1,0 +1,158 @@
+{
+  "description": "Recorded reply for contracts/examples synthetic invoice with the example profile. Synthetic data only.",
+  "fingerprint": "61558da940e8cfd7174c5ec1710d9efad8e62e4857cc4be3b2c7ced77f6572d9",
+  "reply": {
+    "fields": {
+      "invoice_number": {
+        "value": "DEMO-2026-001",
+        "evidence": [
+          {
+            "unitId": "row-2",
+            "quote": "DEMO-2026-001"
+          }
+        ]
+      },
+      "supplier": {
+        "value": "Demo Paper s.r.o.",
+        "evidence": [
+          {
+            "unitId": "row-2",
+            "quote": "Demo Paper s.r.o."
+          }
+        ]
+      },
+      "issue_date": {
+        "value": "2026-10-20",
+        "evidence": [
+          {
+            "unitId": "row-2",
+            "quote": "2026-10-20"
+          }
+        ]
+      },
+      "buyer": {
+        "value": "Demo Grant Association",
+        "evidence": [
+          {
+            "unitId": "row-2",
+            "quote": "Demo Grant Association"
+          }
+        ]
+      },
+      "purchase_order": {
+        "value": null,
+        "evidence": []
+      },
+      "total": {
+        "value": {
+          "amount": "55.00",
+          "currency": "EUR"
+        },
+        "evidence": [
+          {
+            "unitId": "row-4",
+            "quote": "55.00"
+          }
+        ]
+      }
+    },
+    "tables": {
+      "items": {
+        "rows": [
+          {
+            "cells": {
+              "description": {
+                "value": "Workshop notebooks",
+                "evidence": [
+                  {
+                    "unitId": "row-2",
+                    "quote": "Workshop notebooks"
+                  }
+                ]
+              },
+              "quantity": {
+                "value": "2.00",
+                "evidence": [
+                  {
+                    "unitId": "row-2",
+                    "quote": "2.00"
+                  }
+                ]
+              },
+              "unit_price": {
+                "value": {
+                  "amount": "12.50",
+                  "currency": "EUR"
+                },
+                "evidence": [
+                  {
+                    "unitId": "row-2",
+                    "quote": "12.50"
+                  }
+                ]
+              },
+              "line_total": {
+                "value": {
+                  "amount": "25.00",
+                  "currency": "EUR"
+                },
+                "evidence": [
+                  {
+                    "unitId": "row-2",
+                    "quote": "25.00"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "cells": {
+              "description": {
+                "value": "Training materials",
+                "evidence": [
+                  {
+                    "unitId": "row-3",
+                    "quote": "Training materials"
+                  }
+                ]
+              },
+              "quantity": {
+                "value": "3.00",
+                "evidence": [
+                  {
+                    "unitId": "row-3",
+                    "quote": "3.00"
+                  }
+                ]
+              },
+              "unit_price": {
+                "value": {
+                  "amount": "10.00",
+                  "currency": "EUR"
+                },
+                "evidence": [
+                  {
+                    "unitId": "row-3",
+                    "quote": "10.00"
+                  }
+                ]
+              },
+              "line_total": {
+                "value": {
+                  "amount": "30.00",
+                  "currency": "EUR"
+                },
+                "evidence": [
+                  {
+                    "unitId": "row-3",
+                    "quote": "30.00"
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

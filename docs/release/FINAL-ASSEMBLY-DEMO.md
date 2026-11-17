@@ -1,8 +1,8 @@
 # Final assembly fixture demo
 
-This is a failing acceptance procedure on the current continuation, not a product
-PASS. Member 3 owns `codex/final-assembly`. Do not merge unreviewed modules merely
-to make the demonstration continue.
+This procedure exercises the assembled product in fixture mode. The application
+reads the uploaded file and runs the actual worker, review, and export services.
+Only the AI provider reply is recorded.
 
 ## Prerequisites
 
@@ -15,7 +15,7 @@ test launches a real worker; the browser launcher starts its own API and worker.
 
 ```sh
 scripts/final-assembly-demo.sh
-# To inspect the browser failure separately:
+# To run the browser acceptance separately:
 make e2e-full-product
 ```
 
@@ -41,17 +41,5 @@ launcher refuses any database other than `egrant_test_full_product_e2e`.
    same idempotency key without creating another operation.
 6. Repeat the backend scenario with another form and distinct destination tags.
 
-Current observed stopping point: step 3 returns `503 FEATURE_UNAVAILABLE` from
-the real extraction shell. Steps 4–6 are prepared assertions, not verified
-assembled behavior. Provider failure/retry/recovery, live AI/OCR and the broader
-release input set still need execution after the module review gates pass.
-
-## Gates before a successful demo
-
-Member 4 must publish corrections for human-review UTC serialization and invalid
-currency acceptance, followed by member 3's exact-head recheck. Member 2 must
-publish the actual-source extraction fixture correction and resolve the reported
-option/recovery/provider-lifetime findings; member 1 then reviews that exact head.
-Only then can member 3 assemble their routers, worker recovery, metadata and new
-migration merge revision. The new assembly needs member 4's independent review
-and member 1's release verification. See `FINAL-ASSEMBLY-STATUS.md`.
+Separate verification is required for live AI on permitted documents. A JSON
+download does not write to eGrant.

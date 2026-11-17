@@ -12,7 +12,12 @@ from sqlalchemy.engine import make_url
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "backend"))
 url = os.environ["INTEGRATION_E2E_DATABASE_URL"]
-if not (make_url(url).database or "").startswith("egrant_test_e2e"):
+target = make_url(url)
+if (
+    target.get_backend_name() != "postgresql"
+    or target.query
+    or not (target.database or "").startswith("egrant_test_e2e")
+):
     raise RuntimeError("Dedicated egrant_test_e2e database required")
 os.environ.update(
     DATABASE_URL=url,

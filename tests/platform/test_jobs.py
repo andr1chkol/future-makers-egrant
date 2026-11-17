@@ -17,11 +17,19 @@ def test_migration_and_transactional_enqueue(database):
             migrations.get_heads()
         )
         assert len(migrations.get_heads()) == 1
-        assert {"0001_platform", "0101_documents", "0301_profiles", "0501_submissions"} <= {
-            revision.revision for revision in migrations.walk_revisions()
-        }
+        assert {
+            "0001_platform",
+            "0101_documents",
+            "0201_extractions",
+            "0301_profiles",
+            "0401_reviews",
+            "0501_submissions",
+        } <= {revision.revision for revision in migrations.walk_revisions()}
         assert {
             "documents",
+            "extractions",
+            "reviews",
+            "review_revisions",
             "document_source_units",
             "platform_jobs",
             "platform_sessions",

@@ -232,8 +232,7 @@ def test_no_database_transaction_while_parsing(
 def test_migration_upgrade_downgrade(document_database):
     with document_database() as session:
         assert (
-            session.scalar(text("SELECT version_num FROM alembic_version"))
-            == "0503_documents_assembly"
+            session.scalar(text("SELECT version_num FROM alembic_version")) == "0504_full_assembly"
         )
     command.downgrade(migration_config(), "0001_platform")
     with document_database() as session:

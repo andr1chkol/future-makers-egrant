@@ -3,27 +3,16 @@
 Document-to-form extraction with mandatory human review.
 Repository: https://github.com/andr1chkol/future-makers-egrant.
 
-The active integration continuation is `codex/final-assembly`, owned by member 3
-after member 5's handover. It preserves PR #11 at
-`6d3843d43f00424601bd94dd0bba263bd9f6a728`; its verified code ancestor is
-`a5b283f129cf9caed7097d75d71ed0fbd365618a`. The complete product remains blocked
-on the human-review and extraction review gates. See
-[the continuation status](docs/release/FINAL-ASSEMBLY-STATUS.md).
+The `codex/finish-product` branch assembles private document intake, profile
+configuration, extraction, human review, and confirmed JSON export. The default
+fixture mode runs the real application and worker with a recorded AI response
+for the shared synthetic invoice. Unknown fixtures fail explicitly.
 
-Private document intake and immutable normalized
-sources are connected to the shared API and worker. The profiles module supports illustrative form
-import, mapping configuration and immutable profile versions. Confirmed submission
-persistence, idempotent JSON export, history/status pages and recovery logging are
-also implemented. Missing extraction and review registrations return
-`503 FEATURE_UNAVAILABLE`; they are not replaced with runtime example records.
-Existing exports remain downloadable from their stored immutable payload.
-
-The published `bootstrap-v1` is commit
-`88d1b959c524cfd559d01ee8ff6ac3f183f7c9e8`. It remains unchanged. Domain
-modules are integrated through independently reviewed PRs; the complete product
-workflow is still pending. OCR requires explicit Tesseract configuration; AI and eGrant application writes are unavailable.
-Credentials alone do not enable them. Export JSON does not apply data to eGrant.
-See `docs/release/INTEGRATION-HANDOFF.md` for evidence and remaining dependencies.
+Live extraction uses the OpenAI adapter when `APP_MODE=live`,
+`OPENAI_API_KEY`, and `OPENAI_MODEL` are configured. Live mode also requires
+the access gate settings below. OCR requires explicit Tesseract configuration.
+JSON export prepares values for an integration; it does not write to eGrant.
+The `bootstrap-v1` tag remains unchanged.
 
 ## Start with Docker
 
@@ -33,7 +22,7 @@ with npm. Docker runs the application; host Python/Node are for checks and tests
 ```sh
 git clone https://github.com/andr1chkol/future-makers-egrant.git
 cd future-makers-egrant
-git switch codex/final-assembly
+git switch codex/finish-product
 cp .env.example .env
 make dev
 ```
@@ -111,12 +100,8 @@ TEST_DATABASE_URL=postgresql+psycopg://egrant:local-test-only@localhost:55432/eg
 
 The submission suite uses explicit test-only neighboring public-interface doubles while
 exercising the real submission routes, PostgreSQL persistence and JSON download.
-History UI tests mock the absent extraction list. It is not a complete
-upload/extract/review workflow or a live-provider check. Keep test ports free.
-The complete flow and assembled domain-route coverage remain pending review,
-extraction and documents implementations. CI runs foundation, submission and both
-profile browser suites. Artifacts include docs/release screenshots and frontend
-test-results.
+History UI tests simulate responses for the history list. The complete-product
+suite below uses the real neighboring modules. Keep test ports free.
 
 ## Contracts and module ownership
 
@@ -217,8 +202,7 @@ export DOCUMENT_E2E_DATABASE_URL=postgresql+psycopg://egrant:local-test-only@loc
 make e2e-documents
 ```
 
-See docs/release/DOCUMENTS-ASSEMBLY.md for exact verification and the extraction
-fixture compatibility blocker. Separate review links are preserved for separate
+See docs/release/DOCUMENTS-ASSEMBLY.md for the earlier document assembly evidence. Separate review links are preserved for separate
 documents. No unconfirmed data is exported or applied.
 
 ## Complete-product acceptance demo
@@ -232,11 +216,11 @@ then run `scripts/final-assembly-demo.sh`. The backend test resets the supplied
 
 The script uses the production routes, worker, private storage and real file
 normalization in visibly labeled fixture mode. It stops at the first failure.
-On the current continuation it fails at extraction with `503 FEATURE_UNAVAILABLE`.
-The later human edit, confirmation and exact scalar/table export assertions are
-prepared but have not passed. No neighboring service doubles make this a success.
-`make e2e-full-product` runs the browser portion separately; `make test` includes
-the backend acceptance cases and currently fails at the same missing module.
+The backend and browser assertions verify draft persistence, explicit
+confirmation and the exact corrected scalar and table values in the downloaded
+JSON. There are no neighboring service doubles in this suite.
+`make e2e-full-product` runs the browser portion separately; `make test`
+includes the backend acceptance cases.
 
-See [the reproducible demo procedure](docs/release/FINAL-ASSEMBLY-DEMO.md) for
-required review gates, expected results and provider limits.
+See [the reproducible demo procedure](docs/release/FINAL-ASSEMBLY-DEMO.md)
+and [verification evidence](docs/release/FINISH-PRODUCT.md).

@@ -5,7 +5,6 @@ from pathlib import Path
 
 from app.main import create_app
 from app.platform.logging import JsonFormatter, logger
-from app.platform.routes import router as shell_router
 from fastapi.testclient import TestClient
 
 
@@ -67,7 +66,6 @@ def test_production_profile_routes_persist_versions_and_safe_json_context(databa
 
 
 def test_profiles_have_no_unavailable_duplicate_shells():
-    assert not any(route.path.startswith(("/forms", "/profiles")) for route in shell_router.routes)
     from app.platform.database import Base
 
     assert {"profile_forms", "profile_heads", "profile_versions"} <= Base.metadata.tables.keys()

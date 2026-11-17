@@ -30,7 +30,13 @@ def deterministic_document_settings(monkeypatch):
 @pytest.fixture
 def document_database(monkeypatch, tmp_path):
     url = os.environ.get("TEST_DATABASE_URL")
-    if not url or not (make_url(url).database or "").startswith("egrant_test"):
+    target = make_url(url) if url else None
+    if (
+        not target
+        or target.get_backend_name() != "postgresql"
+        or target.query
+        or not (target.database or "").startswith("egrant_test")
+    ):
         pytest.fail("TEST_DATABASE_URL must identify an isolated egrant_test PostgreSQL database")
     monkeypatch.setenv("DATABASE_URL", url)
     monkeypatch.setenv("FILE_STORAGE_PATH", str(tmp_path / "private"))

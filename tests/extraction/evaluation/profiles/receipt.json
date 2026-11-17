@@ -1,0 +1,83 @@
+{
+  "id": "00000000-0000-4000-8000-0000000000a2",
+  "version": 1,
+  "name": "Pokladničný doklad",
+  "documentKind": "receipt",
+  "formId": "00000000-0000-4000-8000-0000000000f1",
+  "scalarFields": [
+    {
+      "key": "merchant",
+      "label": "Predajca",
+      "type": "string",
+      "description": "Name of the shop or merchant",
+      "required": true,
+      "targetTag": "merchant"
+    },
+    {
+      "key": "purchase_date",
+      "label": "Dátum nákupu",
+      "type": "date",
+      "description": "Date of purchase",
+      "required": true,
+      "targetTag": "purchase_date"
+    },
+    {
+      "key": "total",
+      "label": "Suma",
+      "type": "money",
+      "description": "Total paid",
+      "required": true,
+      "targetTag": "total"
+    },
+    {
+      "key": "payment_method",
+      "label": "Spôsob platby",
+      "type": "string",
+      "description": "How the purchase was paid",
+      "required": true,
+      "targetTag": "payment_method"
+    }
+  ],
+  "tableFields": [
+    {
+      "key": "items",
+      "label": "Položky",
+      "targetTag": "items",
+      "writeMode": "append",
+      "columns": [
+        {
+          "key": "description",
+          "label": "Popis",
+          "type": "string",
+          "description": "Item name",
+          "required": true,
+          "targetTag": "description"
+        },
+        {
+          "key": "quantity",
+          "label": "Množstvo",
+          "type": "decimal",
+          "description": "Quantity, if printed",
+          "required": false,
+          "targetTag": "quantity"
+        },
+        {
+          "key": "unit_price",
+          "label": "Jednotková cena",
+          "type": "money",
+          "description": "Unit price, if printed",
+          "required": false,
+          "targetTag": "unit_price"
+        },
+        {
+          "key": "line_total",
+          "label": "Spolu",
+          "type": "money",
+          "description": "Amount for the line",
+          "required": true,
+          "targetTag": "line_total"
+        }
+      ]
+    }
+  ]
+}

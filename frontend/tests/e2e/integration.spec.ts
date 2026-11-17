@@ -96,13 +96,19 @@ test("stale review and eGrant requests fail without a successful operation", asy
 test("history distinguishes unavailable, empty, failure and real returned records", async ({
   page,
 }) => {
-  await page.goto("/history");
-  await expect(page.getByRole("alert")).toContainText(
-    "po pripojení modulu extrakcie",
-  );
-  // History owner is absent. These are explicit UI-only responses, not a live-flow claim.
-  let state = "empty";
+  let state = "unavailable";
   await page.route("**/api/v1/extractions?*", async (route) => {
+    if (state === "unavailable")
+      return route.fulfill({
+        status: 503,
+        json: {
+          error: {
+            code: "FEATURE_UNAVAILABLE",
+            message: "Unavailable",
+            details: null,
+          },
+        },
+      });
     if (state === "failure")
       return route.fulfill({
         status: 502,
@@ -124,6 +130,11 @@ test("history distinguishes unavailable, empty, failure and real returned record
       },
     });
   });
+  await page.goto("/history");
+  await expect(page.getByRole("alert")).toContainText(
+    "po pripojení modulu extrakcie",
+  );
+  state = "empty";
   await page.getByRole("button", { name: "Skúsiť znova" }).click();
   await expect(
     page.getByText("Zatiaľ tu nie sú žiadne spracovania."),

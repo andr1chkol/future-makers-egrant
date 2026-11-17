@@ -10,6 +10,8 @@ from starlette.exceptions import HTTPException
 
 from app.documents.ocr import ocr_configured
 from app.documents.routes import router as documents_router
+from app.extraction.providers import OpenAIProvider
+from app.extraction.routes import router as extraction_router
 from app.integrations.routes import router as integrations_router
 from app.platform.access import (
     COOKIE_NAME,
@@ -23,10 +25,10 @@ from app.platform.database import session_factory
 from app.platform.errors import DomainError
 from app.platform.logging import log, request_id
 from app.platform.models import AccessSession
-from app.platform.routes import router
 from app.platform.settings import get_settings
 from app.platform.upload_limit import UploadBodyLimit
 from app.profiles.routes import router as profiles_router
+from app.reviews.routes import router as reviews_router
 
 ERROR_RESPONSES = {
     status: {"model": ErrorEnvelope} for status in [401, 403, 404, 409, 413, 422, 500, 502, 503]
@@ -133,14 +135,15 @@ def create_app() -> FastAPI:
         return {
             "data": {
                 "ocrConfigured": ocr_configured(),
-                "aiConfigured": False,
+                "aiConfigured": OpenAIProvider.from_settings(get_settings()) is not None,
                 "egrantConfigured": False,
                 "mode": get_settings().app_mode,
             }
         }
 
     app.include_router(documents_router, prefix="/api/v1", dependencies=[Depends(require_access)])
-    app.include_router(router, prefix="/api/v1", dependencies=[Depends(require_access)])
+    app.include_router(extraction_router, prefix="/api/v1", dependencies=[Depends(require_access)])
+    app.include_router(reviews_router, prefix="/api/v1")
     app.include_router(
         integrations_router, prefix="/api/v1", dependencies=[Depends(require_access)]
     )
